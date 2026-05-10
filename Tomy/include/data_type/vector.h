@@ -1,5 +1,9 @@
 ﻿#pragma once
+#include <string.h>
+
 #include "data_type.h"
+#include "print.h"
+#include "ustring.h"
 #include "class/object_class.h"
 
 VTABLE{
@@ -51,6 +55,11 @@ void* _VectorBase_Data(const _VectorBase* self);
 void _VectorBase_PushBack(_VectorBase* self, const void* elem);
 void _VectorBase_PopBack(_VectorBase* self);
 void _VectorBase_Erase(_VectorBase* self, umax index);
+void _VectorBase_Insert(_VectorBase* self, umax index, const void* elem);
+void* _VectorBase_EmplaceBack(_VectorBase* self);
+void _VectorBase_SwapErase(_VectorBase* self, umax index);
+void _VectorBase_ShrinkToFit(_VectorBase* self);
+void _VectorBase_Swap(_VectorBase* self, _VectorBase* other);
 
 inline void _VectorBase_Create(_VectorBase* self, const umax elem_size, ElemConstructor* const construct, ElemDestructor* destroy, ElemCopy* const copy)
 {
@@ -330,6 +339,179 @@ inline void _VectorBase_Erase(_VectorBase* self, const umax index)
     self->size -= 1;
 }
 
+inline void _VectorBase_Insert(_VectorBase* self, const umax index, const void* elem)
+{
+    ERR_RET_NULL(self);
+    ERR_RET_NULL(elem);
+    ERR_RET_V_COND(self->elem_size == 0, );
+    ERR_RET_V_COND(index > self->size, );
+
+    // Ensure capacity for one more element
+    const umax needed = self->size + 1;
+    if (needed > self->capacity)
+    {
+        umax new_capacity = self->capacity == 0 ? 1 : self->capacity * 2;
+        while (new_capacity < needed)
+        {
+            new_capacity = new_capacity * 2;
+            if (new_capacity == 0)    break;
+        }
+        _VectorBase_Reserve(self, new_capacity);
+        ERR_RET_V_COND_MSG(needed > self->capacity, , "Failed to insert: not enough memory.");
+    }
+
+    byte* base = (byte*)self->data;
+
+    if (index == self->size)
+    {
+        byte* dest = base + self->size * self->elem_size;
+        if (self->copy)
+            self->copy(dest, elem);
+        else
+            memcpy(dest, elem, self->elem_size);
+    }
+    else
+    {
+        if (self->copy)
+        {
+            for (umax i = self->size; i > index; --i)
+            {
+                byte* dest = base + i * self->elem_size;
+                byte* src = base + (i - 1) * self->elem_size;
+                self->copy(dest, src);
+                if (self->destroy)
+                    self->destroy(src);        // ★ 销毁原对象，释放其资源
+            }
+        }
+        else
+        {
+            memmove(base + (index + 1) * self->elem_size,
+                base + index * self->elem_size,
+                (self->size - index) * self->elem_size);
+        }
+
+        byte* target = base + index * self->elem_size;
+        if (self->copy)
+            self->copy(target, elem);
+        else
+            memcpy(target, elem, self->elem_size);
+    }
+
+    self->size += 1;
+}
+
+inline void* _VectorBase_EmplaceBack(_VectorBase* self)
+{
+    ERR_RET_V_NULL(self, NULL);
+
+    const umax needed = self->size + 1;
+    if (needed > self->capacity)
+    {
+        umax new_capacity = self->capacity == 0 ? 1 : self->capacity * 2;
+        while (new_capacity < needed)
+        {
+            new_capacity = new_capacity * 2;
+            if (new_capacity == 0)    break;
+        }
+        _VectorBase_Reserve(self, new_capacity);
+        ERR_RET_V_COND_MSG(needed > self->capacity, NULL, "Failed to emplace: not enough memory.");
+    }
+
+    byte* dest = (byte*)self->data + self->size * self->elem_size;
+    if (self->construct)
+        self->construct(dest);
+    else
+        memset(dest, 0, self->elem_size);
+
+    self->size += 1;
+    return dest;
+}
+
+inline void _VectorBase_SwapErase(_VectorBase* self, const umax index)
+{
+    ERR_RET_NULL(self);
+    ERR_RET_V_COND(self->elem_size == 0, );
+    ERR_RET_V_COND(self->size == 0, );
+    ERR_RET_V_COND(index >= self->size, );
+
+    const umax last_index = self->size - 1;
+    if (index == last_index)
+    {
+        byte* last = (byte*)self->data + last_index * self->elem_size;
+        if (self->destroy)
+            self->destroy(last);
+        self->size -= 1;
+        return;
+    }
+
+    byte* base = (byte*)self->data;
+    byte* target = base + index * self->elem_size;
+    byte* last = base + last_index * self->elem_size;
+
+    // Overwrite target with last element
+    if (self->destroy)
+        self->destroy(target);
+    if (self->copy)
+        self->copy(target, last);
+    else
+        memcpy(target, last, self->elem_size);
+
+    // Destroy the now-unused last slot
+    if (self->destroy)
+        self->destroy(last);
+
+    self->size -= 1;
+}
+
+inline void _VectorBase_ShrinkToFit(_VectorBase* self)
+{
+    ERR_RET_NULL(self);
+    if (self->size == self->capacity)    return;
+    if (self->size == 0)
+    {
+        free(self->data);
+        self->data = NULL;
+        self->capacity = 0;
+        return;
+    }
+
+    const umax new_bytes = self->size * self->elem_size;
+    void* new_data = malloc(new_bytes);
+    ERR_RET_NULL_MSG(new_data, "Failed to shrink: not enough memory.");
+
+    if (self->copy)
+    {
+        byte* src = (byte*)self->data;
+        byte* dst = (byte*)new_data;
+        for (umax i = 0; i < self->size; ++i)
+            self->copy(dst + i * self->elem_size, src + i * self->elem_size);
+    }
+    else
+    {
+        memcpy(new_data, self->data, new_bytes);
+    }
+
+    if (self->destroy && self->data)
+    {
+        byte* p = (byte*)self->data;
+        for (umax i = 0; i < self->size; ++i)
+            self->destroy(p + i * self->elem_size);
+    }
+
+    free(self->data);
+    self->data = new_data;
+    self->capacity = self->size;
+}
+
+inline void _VectorBase_Swap(_VectorBase* self, _VectorBase* other)
+{
+    ERR_RET_NULL(self);
+    ERR_RET_NULL(other);
+    _VectorBase tmp = *self;
+    *self = *other;
+    *other = tmp;
+}
+
 #define _VECTOR_IMPL_EX1(T, CONSTRUCT, DESTROY, COPY)                                       \
                                                                                             \
     VTABLE{                                                                                 \
@@ -356,6 +538,11 @@ VTABLE{                                                                         
     void (*push_back)(void *self, T elem);                                                  \
     void (*pop_back)(void *self);                                                           \
     void (*erase)(void *self, umax index);                                                  \
+    void (*insert)(void *self, umax index, T elem);                                         \
+    void (*shrink_to_fit)(void *self);                                                      \
+    void (*swap)(void *self, void *other);                                                  \
+    void* (*emplace_back)(void *self);                                                       \
+    void (*swap_erase)(void *self, umax index);                                              \
                                                                                             \
 }_Vector_##T##_VTable;                                                                      \
 CLASS{                                                                                      \
@@ -379,6 +566,12 @@ Vector_##T##_Iterator _Vector_##T##_End(const Vector_##T* self);                
 T* _Vector_##T##_Data(const Vector_##T* self);                                              \
                                                                                             \
 void _Vector_##T##_PushBack(Vector_##T* self, T elem);                                      \
+void _Vector_##T##_Erase(Vector_##T* self, umax index);                                     \
+void _Vector_##T##_Insert(Vector_##T* self, umax index, T elem);                            \
+void _Vector_##T##_ShrinkToFit(Vector_##T* self);                                            \
+void _Vector_##T##_Swap(Vector_##T* self, Vector_##T* other);                               \
+T* _Vector_##T##_EmplaceBack(Vector_##T* self);                                              \
+void _Vector_##T##_SwapErase(Vector_##T* self, umax index);                                  \
                                                                                             \
     void _Vector_##T##_Iterator##_Create(Vector_##T##_Iterator* self);                      \
     void _Vector_##T##_Iterator##_Destroy(Vector_##T##_Iterator* self);                     \
@@ -422,8 +615,8 @@ void _Vector_##T##_PushBack(Vector_##T* self, T elem);                          
         free(self);                                                                         \
     }                                                                                       \
     inline String* _Vector_##T##_Iterator##_ToString(Vector_##T##_Iterator* self) {         \
-        String* str = string_new(STRING_CAPACITY);                                          \
-        string_append_s(str, "VectorIterator");                                             \
+        String* str = New(String, STRING_CAPACITY);                                          \
+        Call(String, str, Append, "VectorIterator");                                             \
         return str;                                                                         \
     }                                                                                       \
     inline T* _Vector_##T##_Iterator##_Raw(const Vector_##T##_Iterator* self) {             \
@@ -462,6 +655,12 @@ inline void _Vector_##T##_Create(Vector_##T* self) {                            
         .data      = _Vector_##T##_Data,                                                    \
         .push_back = _Vector_##T##_PushBack,                                                \
         .pop_back  = _VectorBase_PopBack,                                                   \
+        .erase     = _Vector_##T##_Erase,                                                  \
+        .insert    = _Vector_##T##_Insert,                                                 \
+        .shrink_to_fit = _Vector_##T##_ShrinkToFit,                                        \
+        .swap      = _Vector_##T##_Swap,                                                   \
+        .emplace_back = _Vector_##T##_EmplaceBack,                                         \
+        .swap_erase    = _Vector_##T##_SwapErase,                                          \
     };                                                                                      \
     _VectorBase_Create((_VectorBase*)self, sizeof(T), CONSTRUCT, DESTROY, COPY);            \
     self->vptr = (void*)&_Vector_##T##_VTable_Instance;                                     \
@@ -470,14 +669,14 @@ inline Vector_##T* _Vector_##T##_New() {                                        
     return (Vector_##T*)_VectorBase_New(sizeof(T), CONSTRUCT, DESTROY, COPY);               \
 }                                                                                           \
 inline String* _Vector_##T##_ToString(Vector_##T* self) {                                   \
-    String* str = string_new(STRING_CAPACITY);                                              \
-    string_append_s(str, "Vector");                                                         \
+    String* str = New(String, STRING_CAPACITY);                                              \
+    Call(String, str, Append, "Vector");                                                         \
     char buf[TEMP_BUFFER_SIZE] = { 0 };                                                     \
     int len = snprintf(buf, sizeof(buf), "<%s>", #T);                                       \
-    string_append_sn(str, buf, len);                                                        \
+    Call(String, str, AppendN, buf, len);                                                        \
     len = snprintf(buf, sizeof(buf),                                                        \
         " size: %llu, at %p", self->size, self);                                            \
-    string_append_sn(str, buf, len);                                                        \
+    Call(String, str, AppendN, buf, len);                                                        \
     return str;                                                                             \
 }                                                                                           \
 inline void _Vector_##T##_Resize(Vector_##T* self, const umax new_size) {                   \
@@ -529,7 +728,53 @@ inline void _Vector_##T##_PushBack(Vector_##T* self, T elem) {                  
     _VectorBase_PushBack((_VectorBase*)self, &elem);                                        \
     self->front = (T*)_VectorBase_Front((_VectorBase*)self);                                \
     self->back = (T*)_VectorBase_Back((_VectorBase*)self);                                  \
-}
+}                                                                                           \
+inline void _Vector_##T##_Erase(Vector_##T* self, const umax index) {                      \
+    _VectorBase_Erase((_VectorBase*)self, index);                                           \
+    if (self->size == 0) {                                                                  \
+        self->front = NULL;                                                                 \
+        self->back = NULL;                                                                  \
+    } else {                                                                                \
+        self->front = (T*)_VectorBase_Front((_VectorBase*)self);                            \
+        self->back = (T*)_VectorBase_Back((_VectorBase*)self);                              \
+    }                                                                                       \
+}                                                                                           \
+inline void _Vector_##T##_Insert(Vector_##T* self, const umax index, T elem) {             \
+    _VectorBase_Insert((_VectorBase*)self, index, &elem);                                  \
+    self->front = (T*)_VectorBase_Front((_VectorBase*)self);                                \
+    self->back = (T*)_VectorBase_Back((_VectorBase*)self);                                  \
+}                                                                                           \
+inline void _Vector_##T##_ShrinkToFit(Vector_##T* self) {                                   \
+    _VectorBase_ShrinkToFit((_VectorBase*)self);                                            \
+    if (self->size == 0) {                                                                  \
+        self->front = NULL;                                                                 \
+        self->back = NULL;                                                                  \
+    } else {                                                                                \
+        self->front = (T*)_VectorBase_Front((_VectorBase*)self);                            \
+        self->back = (T*)_VectorBase_Back((_VectorBase*)self);                              \
+    }                                                                                       \
+}                                                                                           \
+inline void _Vector_##T##_Swap(Vector_##T* self, Vector_##T* other) {                      \
+    Vector_##T tmp = *self;                                                                 \
+    *self = *other;                                                                         \
+    *other = tmp;                                                                           \
+}                                                                                           \
+inline T* _Vector_##T##_EmplaceBack(Vector_##T* self) {                                      \
+    T* ptr = (T*)_VectorBase_EmplaceBack((_VectorBase*)self);                                \
+    self->front = (T*)_VectorBase_Front((_VectorBase*)self);                                  \
+    self->back = (T*)_VectorBase_Back((_VectorBase*)self);                                    \
+    return ptr;                                                                               \
+}                                                                                           \
+inline void _Vector_##T##_SwapErase(Vector_##T* self, const umax index) {                    \
+    _VectorBase_SwapErase((_VectorBase*)self, index);                                        \
+    if (self->size == 0) {                                                                   \
+        self->front = NULL;                                                                  \
+        self->back = NULL;                                                                   \
+    } else {                                                                                 \
+        self->front = (T*)_VectorBase_Front((_VectorBase*)self);                             \
+        self->back = (T*)_VectorBase_Back((_VectorBase*)self);                               \
+    }                                                                                        \
+}                                                                                           \
 
 #define _VECTOR_IMPL_EX2(T, CONSTRUCT, DESTROY, COPY) _VECTOR_IMPL_EX1(T, CONSTRUCT, DESTROY, COPY)
 #define _VECTOR_IMPL_EX3(T, CONSTRUCT, DESTROY, COPY) _VECTOR_IMPL_EX2(T, CONSTRUCT, DESTROY, COPY)
@@ -561,7 +806,7 @@ VECTOR_IMPL(f64);
 
 VECTOR_IMPL(Object);
 
-VECTOR_IMPL_EX(String, string_init, string_deinit, string_copy);
+VECTOR_IMPL_EX(String, _String_Create, _String_Destroy, _String_Copy);
 
 //#define VECTOR_X(T, T_CONSTRUCT, T_DESTROY, T_COPY)
 
@@ -580,7 +825,7 @@ VECTOR_IMPL_EX(String, string_init, string_deinit, string_copy);
 //    VECTOR_X(f32,  NULL, NULL, NULL) \
 //    VECTOR_X(f64,  NULL, NULL, NULL) \
 //    VECTOR_X(Object, NULL, NULL, NULL) \
-//    VECTOR_X(String, string_init, string_deinit, string_copy)
+//    VECTOR_X(String, _String_Create, _String_Destroy, _String_Copy)
 //
 //#define VECTOR_X(T, T_CONSTRUCT, T_DESTROY, T_COPY) VECTOR_IMPL_EX(T, T_CONSTRUCT, T_DESTROY, T_COPY)
 //VECTOR_LIST;

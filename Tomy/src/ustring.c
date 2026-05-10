@@ -1,8 +1,21 @@
 ﻿#include "ustring.h"
 
 #include <assert.h>
+#include <string.h>
 
 #include "error.h"
+
+static _String_VTable _String_VTable_Instance = {
+    _String_Create,
+    _String_Destroy,
+    _String_New,
+    _String_Delete,
+    _String_ToString,
+    .reserve = _String_Reserve,
+    .copy = _String_Copy,
+    .append_n = _String_AppendN,
+};
+
 size_t calculate_capacity(size_t size)
 {
     size_t capacity = 0;
@@ -22,23 +35,11 @@ size_t calculate_capacity(size_t size)
     return capacity;
 }
 
-void string_init_with_size(String* self, size_t capacity)
+void _String_Create(String* self)
 {
     assert(self != NULL);
-    char* buf = (char*)calloc(capacity + 1, sizeof(char));
-    if (buf == NULL)
-    {
-        *self = (String){ 0 };
-        return;
-    }
-    self->capacity = capacity;
-    self->size = 0;
-    self->data = buf;
-}
-
-void string_init(String* self)
-{
-    assert(self != NULL);
+    Object_Create((Object*)self);
+    ((Object*)self)->vptr = (_Object_VTable*)&_String_VTable_Instance;
     char* buf = (char*)calloc(STRING_CAPACITY + 1, sizeof(char));
     if (buf == NULL)
     {
@@ -50,14 +51,35 @@ void string_init(String* self)
     self->data = buf;
 }
 
-void string_deinit(String* self)
+void _String_CreateN(String* self, size_t capacity)
+{
+    assert(self != NULL);
+    if (capacity == STRING_CAPACITY)
+    {
+        _String_Create(self);
+        return;
+    }
+    Object_Create((Object*)self);
+    ((Object*)self)->vptr = (_Object_VTable*)&_String_VTable_Instance;
+    char* buf = (char*)calloc(capacity + 1, sizeof(char));
+    if (buf == NULL)
+    {
+        *self = (String){ 0 };
+        return;
+    }
+    self->capacity = capacity;
+    self->size = 0;
+    self->data = buf;
+}
+
+void _String_Destroy(String* self)
 {
     assert(self != NULL);
     free(self->data);
     *self = (String){ 0 };
 }
 
-String* string_new(size_t capacity)
+String* _String_New(size_t capacity)
 {
     if (!capacity)
         capacity = STRING_CAPACITY;
@@ -65,20 +87,27 @@ String* string_new(size_t capacity)
 
     ERR_RET_V_COND_MSG(self == NULL, NULL, "String Memory allocation failed.");
 
-    string_init_with_size(self, capacity);
+    _String_CreateN(self, capacity);
     return self;
 }
 
-void string_delete(String* self)
+void _String_Delete(String* self)
 {
     assert(self != NULL);
-    free(self->data);
+    _String_Destroy(self);
     free(self);
 }
 
-bool string_realloc(String* self, const size_t new_capacity)
+String* _String_ToString(String* self)
 {
-    //assert(self != NULL);
+    String* str = New(String, STRING_CAPACITY);
+    if (self->data)
+        Call(String, str, AppendN, self->data, self->size);
+    return str;
+}
+
+bool _String_Reserve(String* self, const size_t new_capacity)
+{
     ERR_RET_V_NULL(self, false);
     char* buf = (char*)realloc(self->data, new_capacity + 1);
     if (buf == NULL)
@@ -99,13 +128,13 @@ bool string_realloc(String* self, const size_t new_capacity)
     return true;
 }
 
-bool string_copy(String* self, const String* src)
+bool _String_Copy(String* self, const String* src)
 {
     ERR_RET_V_NULL(self, false);
     ERR_RET_V_NULL(src, false);
     ERR_RET_V_COND(self == src, true);
 
-    string_init(self);
+    _String_Create(self);
 
     const size_t needed = src->size;
 
@@ -114,22 +143,10 @@ bool string_copy(String* self, const String* src)
         return true;
     }
 
-    if (needed > self->capacity)
-    {
-        //size_t new_capacity = calculate_capacity(needed);
-        //if (new_capacity < needed)
-        //    new_capacity = needed;
-        //if (!string_realloc(self, new_capacity))
-        //    return false;
-    }
-
-    //memcpy(self->data, src->data, needed);
-    //self->data[needed] = '\0';
-    //self->size = needed;
-    return string_insert_s(self, 0, src->data);
+    return _String_Insert(self, 0, src->data);
 }
 
-bool string_insert_sn(String* self, size_t pos, const char* s, size_t n)
+bool _String_InsertN(String* self, size_t pos, const char* s, size_t n)
 {
     assert(self != NULL);
     if (pos > self->size)
@@ -140,7 +157,7 @@ bool string_insert_sn(String* self, size_t pos, const char* s, size_t n)
     if (new_size > self->capacity)
     {
         size_t new_capacity = calculate_capacity(new_size);
-        bool ok = string_realloc(self, new_capacity);
+        bool ok = _String_Reserve(self, new_capacity);
         if (!ok)
         {
             return false;
@@ -152,22 +169,22 @@ bool string_insert_sn(String* self, size_t pos, const char* s, size_t n)
     return true;
 }
 
-bool string_insert_s(String* self, size_t pos, const char* s)
+bool _String_Insert(String* self, size_t pos, const char* s)
 {
     assert(self != NULL);
     size_t n = strlen(s);
-    return string_insert_sn(self, pos, s, n);
+    return _String_InsertN(self, pos, s, n);
 }
 
-bool string_append_sn(String* self, const char* s, size_t n)
+bool _String_AppendN(String* self, const char* s, size_t n)
 {
     assert(self != NULL);
-    return string_insert_sn(self, self->size, s, n);
+    return _String_InsertN(self, self->size, s, n);
 }
 
-bool string_append_s(String* self, const char* s)
+bool _String_Append(String* self, const char* s)
 {
     assert(self != NULL);
     size_t n = strlen(s);
-    return string_append_sn(self, s, n);
+    return _String_AppendN(self, s, n);
 }

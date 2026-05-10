@@ -316,10 +316,22 @@ inline double _min_double(const double a, const double b)
 
 #define ITER_TYPE(container_type) CONCAT(container_type, _Iterator)
 
+#ifdef __GNUC__
 #define foreach(container_type, elem, container)                                                    \
     for (int _keep_ = 1; _keep_; _keep_ = 0)                                                        \
         for (ITER_TYPE(container_type) _it_  = VCall(container_type, &container, begin),            \
                                        _end_ = VCall(container_type, &container, end);              \
              !VCall(ITER_TYPE(container_type), &_it_, equals, &_end_) && _keep_;                    \
-              VCall(ITER_TYPE(container_type), &_it_, next), _keep_ = !_keep_)                      \
-            for (_TYPE_OF(VCall(ITER_TYPE(container_type), &_it_, get)) elem = VCall(ITER_TYPE(container_type), &_it_, get); _keep_; _keep_ = !_keep_)
+             VCall(ITER_TYPE(container_type), &_it_, next), _keep_ = !_keep_)                       \
+            for (auto elem = VCall(ITER_TYPE(container_type), &_it_, get); _keep_; _keep_ = !_keep_)
+#else
+
+#define foreach(container_type, elem, container)                                                    \
+    for (int _keep_ = 1; _keep_; _keep_ = 0)                                                        \
+        for (ITER_TYPE(container_type) _it_  = VCall(container_type, &container, begin),            \
+                                       _end_ = VCall(container_type, &container, end);              \
+             !VCall(ITER_TYPE(container_type), &_it_, equals, &_end_) && _keep_;                    \
+             VCall(ITER_TYPE(container_type), &_it_, next), _keep_ = !_keep_)                       \
+            for (_TYPE_OF(VCall(ITER_TYPE(container_type), &_it_, get)) elem =                      \
+                     VCall(ITER_TYPE(container_type), &_it_, get); _keep_; _keep_ = !_keep_)
+#endif

@@ -148,17 +148,17 @@ typedef struct string_t {
 
 | 函数 | 说明 |
 |------|------|
-| `string_new(cap)` | 堆分配新字符串 |
-| `string_delete(self)` | 释放字符串 |
-| `string_init(self)` | 栈初始化（默认容量 32） |
-| `string_init_with_size(self, cap)` | 指定容量初始化 |
-| `string_deinit(self)` | 栈析构 |
-| `string_append_s(str, s)` | 追加 C 字符串 |
-| `string_append_sn(str, s, n)` | 追加指定长度 |
-| `string_insert_s(str, pos, s)` | 插入 C 字符串 |
-| `string_insert_sn(str, pos, s, n)` | 插入指定长度 |
-| `string_copy(dst, src)` | 拷贝 |
-| `string_realloc(self, new_cap)` | 重新分配 |
+| `_String_New(cap)` | 堆分配新字符串 |
+| `_String_Delete(self)` | 释放字符串 |
+| `_String_Create(self)` | 栈初始化（默认容量 32） |
+| `_String_CreateN(self, cap)` | 指定容量初始化 |
+| `_String_Destroy(self)` | 栈析构 |
+| `_String_Append(str, s)` | 追加 C 字符串 |
+| `_String_AppendN(str, s, n)` | 追加指定长度 |
+| `_String_Insert(str, pos, s)` | 插入 C 字符串 |
+| `_String_InsertN(str, pos, s, n)` | 插入指定长度 |
+| `_String_Copy(dst, src)` | 拷贝 |
+| `_String_Reserve(self, new_cap)` | 重新分配 |
 
 扩容策略：按需翻倍（`calculate_capacity`）。
 

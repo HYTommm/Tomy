@@ -9,7 +9,7 @@
 #define _VCALL_3(T, self, func, ...) _VCALL_2(T, self, func, __VA_ARGS__)
 #define VCall(T, self, func, ...) _VCALL_3(T, self, func, __VA_ARGS__)
 
-#define _Call_1(T, self, func, ...) T##_##func(self __VA_OPT__(,) __VA_ARGS__)
+#define _Call_1(T, self, func, ...) _##T##_##func(self __VA_OPT__(,) __VA_ARGS__)
 #define _Call_2(T, self, func, ...) _Call_1(T, self, func, __VA_ARGS__)
 #define _Call_3(T, self, func, ...) _Call_2(T, self, func, __VA_ARGS__)
 #define Call(T, self, func, ...) _Call_3(T, self, func, __VA_ARGS__)

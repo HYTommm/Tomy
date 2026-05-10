@@ -131,7 +131,7 @@ enum
   const char* fmt = format_of(value); \
   int len = snprintf(buf, sizeof(buf), fmt, value); \
   if (len < 0) { (err) = ERR_FAIL; break; } \
-  bool ok = string_append_sn(str, buf, len); \
+  bool ok = Call(String, str, AppendN, buf, len); \
   if (!ok) { (err) = ERR_FAIL; break; } \
   (err) = ERR_OK; \
 } while (0)
@@ -209,8 +209,8 @@ inline size_t read_from_color24(String* str, Color24 color)
 {
     String* temp = format("{}[R:{} G:{} B:{}]{}", set_fg_color(color), color.r, color.g, color.b, reset_style());
     const size_t len = temp->size;
-    string_append_sn(str, temp->data, len);
-    string_delete(temp);
+    Call(String, str, AppendN, temp->data, len);
+    Call(String, temp, Delete);
     return len;
 }
 
@@ -287,7 +287,7 @@ inline size_t read_from_va_list(String* str, const int type, va_list* args_ptr)
             {
                 return 1;
             }
-            [[maybe_unused]] bool ok = string_append_sn(str, arg, len);
+            [[maybe_unused]] bool ok = Call(String, str, AppendN, arg, len);
             return len;
         }
         case TYPE_ANY:
@@ -307,10 +307,10 @@ inline size_t read_from_va_list(String* str, const int type, va_list* args_ptr)
             {
                 return 1;
             }
-            [[maybe_unused]] bool ok = string_append_sn(str, arg->data, len);
+            [[maybe_unused]] bool ok = Call(String, str, AppendN, arg->data, len);
             if (type == TYPE_STRING_PTR)
             {
-                string_delete(arg);
+                Call(String, arg, Delete);
             }
             return len;
         }
@@ -368,7 +368,7 @@ inline int format_from_va_list(String* str, const char* fmt, const int count, va
         }
         else
         {
-            string_append_sn(str, fmt + i, 1);
+            Call(String, str, AppendN, fmt + i, 1);
         }
     }
     return arg_index;
@@ -396,14 +396,14 @@ inline void parse_va_list(String* str, const char* sep, const int count, va_list
         }
         if (i < count - 1)
         {
-            [[maybe_unused]] bool ok = string_append_sn(str, sep, sep_len);
+            [[maybe_unused]] bool ok = Call(String, str, AppendN, sep, sep_len);
         }
     }
 }
 
 inline String* format_func(const char* fmt, const int count, ...)
 {
-    String* str = string_new(STRING_CAPACITY);
+    String* str = New(String, STRING_CAPACITY);
     va_list args;
     va_start(args, count);
     format_from_va_list(str, fmt, count, &args);
@@ -440,9 +440,9 @@ inline void print_func(const PrintConfig* config, int count, ...)
     va_list args;
     va_start(args, count);
     String a = { 0 };
-    string_init_with_size(&a, STRING_CAPACITY);
+    Create(String, &a);
     parse_va_list(&a, sep, count, args);
-    string_append_s(&a, end);
+    Call(String, &a, Append, end);
     if (a.data)
     {
         FPRINTSN(file, a.data, a.size);
@@ -451,7 +451,7 @@ inline void print_func(const PrintConfig* config, int count, ...)
             FFLUSH(file);
         }
     }
-    string_deinit(&a);
+    Call(String, &a, Destroy);
     va_end(args);
 }
 
@@ -484,9 +484,9 @@ inline void println_func(const PrintConfig* config, int count, ...)
     va_list args;
     va_start(args, count);
     String a = { 0 };
-    string_init_with_size(&a, STRING_CAPACITY);
+    Create(String, &a);
     parse_va_list(&a, sep, count, args);
-    string_append_s(&a, end);
+    Call(String, &a, Append, end);
     if (a.data)
     {
         FPRINTSN(file, a.data, a.size);
@@ -495,7 +495,7 @@ inline void println_func(const PrintConfig* config, int count, ...)
             FFLUSH(file);
         }
     }
-    string_deinit(&a);
+    Call(String, &a, Destroy);
     va_end(args);
 }
 

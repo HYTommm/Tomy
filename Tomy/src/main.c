@@ -156,25 +156,25 @@ void vector_test_pod(void)
     }
 
     // 5. Erase
-    //{
-    //    Vec(f32) v;
-    //    Create(Vec(f32), &v);
-    //    for (f32 i = 1; i <= 5; i++)
-    //        FT(Vec(f32), &v)->push_back(&v, i);
-    //    FT(Vec(f32), &v)->erase(&v, 1);
-    //    f32* a0 = FT(Vec(f32), &v)->at(&v, 0);
-    //    f32* a1 = FT(Vec(f32), &v)->at(&v, 1);
-    //    _test_check(*a0 == 1.0f && *a1 == 3.0f, "Erase middle: ");
+    {
+        Vec(f32) v;
+        Create(Vec(f32), &v);
+        for (f32 i = 1; i <= 5; i++)
+            FT(Vec(f32), &v)->push_back(&v, i);
+        FT(Vec(f32), &v)->erase(&v, 1);
+        f32* a0 = FT(Vec(f32), &v)->at(&v, 0);
+        f32* a1 = FT(Vec(f32), &v)->at(&v, 1);
+        _test_check(*a0 == 1.0f && *a1 == 3.0f, "Erase middle: ");
 
-    //    FT(Vec(f32), &v)->erase(&v, 3);
-    //    f32* b = FT(Vec(f32), &v)->back(&v);
-    //    _test_check(*b == 4.0f, "Erase last: ");
+        FT(Vec(f32), &v)->erase(&v, 3);
+        f32* b = FT(Vec(f32), &v)->back(&v);
+        _test_check(*b == 4.0f, "Erase last: ");
 
-    //    FT(Vec(f32), &v)->erase(&v, 0);
-    //    f32* f = FT(Vec(f32), &v)->front(&v);
-    //    _test_check(*f == 3.0f, "Erase first: ");
-    //    v.vptr->destroy(&v);
-    //}
+        FT(Vec(f32), &v)->erase(&v, 0);
+        f32* f = FT(Vec(f32), &v)->front(&v);
+        _test_check(*f == 3.0f, "Erase first: ");
+        v.vptr->destroy(&v);
+    }
 
     // 6. Reserve
     {
@@ -260,6 +260,34 @@ void vector_test_pod(void)
         _test_check(data[0] == 0.0f && data[9999] == 9999.0f, "Data pointer: ");
         v.vptr->destroy(&v);
     }
+
+    // 11. EmplaceBack POD
+    {
+        Vec(f32) v;
+        Create(Vec(f32), &v);
+        f32* p = (f32*)FT(Vec(f32), &v)->emplace_back(&v);
+        _test_check(p != NULL && !VCall(Vec(f32), &v, is_empty), "EmplaceBack POD: ");
+        *p = 3.14f;
+        f32* b = FT(Vec(f32), &v)->back(&v);
+        _test_check(*b == 3.14f, "EmplaceBack value: ");
+        v.vptr->destroy(&v);
+    }
+
+    // 12. SwapErase POD
+    {
+        Vec(f32) v;
+        Create(Vec(f32), &v);
+        for (f32 i = 0; i < 4; i++)
+            FT(Vec(f32), &v)->push_back(&v, i);
+        // [0, 1, 2, 3] — swap_erase(1) → last element (3) moves to 1 → [0, 3, 2]
+        FT(Vec(f32), &v)->swap_erase(&v, 1);
+        f32* a0 = FT(Vec(f32), &v)->at(&v, 0);
+        f32* a1 = FT(Vec(f32), &v)->at(&v, 1);
+        _test_check(*a0 == 0.0f && *a1 == 3.0f, "SwapErase middle: ");
+        f32* b = FT(Vec(f32), &v)->back(&v);
+        _test_check(*b == 2.0f, "SwapErase back: ");
+        v.vptr->destroy(&v);
+    }
 }
 
 void vector_test_string(void)
@@ -287,9 +315,9 @@ void vector_test_string(void)
         FT(Vec(String), &v)->push_back(&v, *s2);
         FT(Vec(String), &v)->push_back(&v, *s3);
 
-        string_delete(s1);
-        string_delete(s2);
-        string_delete(s3);
+        Call(String, s1, Delete);
+        Call(String, s2, Delete);
+        Call(String, s3, Delete);
 
         const String* a0 = FT(Vec(String), &v)->at(&v, 0);
         const String* a1 = FT(Vec(String), &v)->at(&v, 1);
@@ -308,36 +336,36 @@ void vector_test_string(void)
         {
             String* s = format("str_{}", i);
             FT(Vec(String), &v)->push_back(&v, *s);
-            string_delete(s);
+            Call(String, s, Delete);
         }
         FT(Vec(String), &v)->clear(&v);
         _test_check(VCall(Vec(String), &v, is_empty), "Clear strings: ");
 
         String* s = format("after_clear");
         FT(Vec(String), &v)->push_back(&v, *s);
-        string_delete(s);
+        Call(String, s, Delete);
         const String* a = FT(Vec(String), &v)->at(&v, 0);
         _test_check(strcmp(a->data, "after_clear") == 0, "Re-push string: ");
         v.vptr->destroy(&v);
     }
 
-    //// 4. Erase string
-    //{
-    //    Vec(String) v;
-    //    Create(Vec(String), &v);
-    //    const char* words[] = { "aaa", "bbb", "ccc", "ddd" };
-    //    for (int i = 0; i < 4; i++)
-    //    {
-    //        String* s = format(words[i]);
-    //        FT(Vec(String), &v)->push_back(&v, *s);
-    //        string_delete(s);
-    //    }
-    //    FT(Vec(String), &v)->erase(&v, 1);
-    //    const String* a0 = FT(Vec(String), &v)->at(&v, 0);
-    //    const String* a1 = FT(Vec(String), &v)->at(&v, 1);
-    //    _test_check(strcmp(a0->data, "aaa") == 0 && strcmp(a1->data, "ccc") == 0, "Erase string: ");
-    //    v.vptr->destroy(&v);
-    //}
+    // 4. Erase string
+    {
+        Vec(String) v;
+        Create(Vec(String), &v);
+        const char* words[] = { "aaa", "bbb", "ccc", "ddd" };
+        for (int i = 0; i < 4; i++)
+        {
+            String* s = format(words[i]);
+            FT(Vec(String), &v)->push_back(&v, *s);
+            Call(String, s, Delete);
+        }
+        FT(Vec(String), &v)->erase(&v, 1);
+        const String* a0 = FT(Vec(String), &v)->at(&v, 0);
+        const String* a1 = FT(Vec(String), &v)->at(&v, 1);
+        _test_check(strcmp(a0->data, "aaa") == 0 && strcmp(a1->data, "ccc") == 0, "Erase string: ");
+        v.vptr->destroy(&v);
+    }
 
     // 5. Foreach
     {
@@ -347,7 +375,7 @@ void vector_test_string(void)
         {
             String* s = format("n{}", i);
             FT(Vec(String), &v)->push_back(&v, *s);
-            string_delete(s);
+            Call(String, s, Delete);
         }
         int count = 0;
         foreach(Vec(String), str, v)
@@ -355,6 +383,38 @@ void vector_test_string(void)
             count++;
         }
         _test_check(count == 3, "Foreach strings: ");
+        v.vptr->destroy(&v);
+    }
+
+    // 6. EmplaceBack string (in-place construct)
+    {
+        Vec(String) v;
+        Create(Vec(String), &v);
+        String* p = (String*)FT(Vec(String), &v)->emplace_back(&v);
+        _test_check(p != NULL && p->data != NULL, "EmplaceBack string: ");
+        Call(String, p, Append, "in_place");
+        _test_check(strcmp(p->data, "in_place") == 0, "EmplaceBack assign: ");
+        v.vptr->destroy(&v);
+    }
+
+    // 7. SwapErase string
+    {
+        Vec(String) v;
+        Create(Vec(String), &v);
+        const char* words[] = { "aaa", "bbb", "ccc", "ddd" };
+        for (int i = 0; i < 4; i++)
+        {
+            String* s = format(words[i]);
+            FT(Vec(String), &v)->push_back(&v, *s);
+            Call(String, s, Delete);
+        }
+        // [aaa, bbb, ccc, ddd] — swap_erase(1) → last (ddd) moves to 1 → [aaa, ddd, ccc]
+        FT(Vec(String), &v)->swap_erase(&v, 1);
+        const String* a0 = FT(Vec(String), &v)->at(&v, 0);
+        const String* a1 = FT(Vec(String), &v)->at(&v, 1);
+        const String* a2 = FT(Vec(String), &v)->at(&v, 2);
+        _test_check(strcmp(a0->data, "aaa") == 0 && strcmp(a1->data, "ddd") == 0, "SwapErase string: ");
+        _test_check(strcmp(a2->data, "ccc") == 0, "SwapErase unchanged: ");
         v.vptr->destroy(&v);
     }
 }
