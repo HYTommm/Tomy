@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include "tomy.h"
+#include "test.h"
 
 //#define PRINT_ANY_TEST
 //#define PRINT_FMT_TEST
@@ -16,6 +17,13 @@
 #define VECTOR_TEST_POD
 #define VECTOR_TEST_STRING
 #define VECTOR_TEST_EDGE
+#endif
+
+#define HASHMAP_TEST
+#ifdef HASHMAP_TEST
+#define HASHMAP_TEST_POD
+#define HASHMAP_TEST_STRING
+#define HASHMAP_TEST_EDGE
 #endif
 
 void print_256_color_table(void)
@@ -82,54 +90,34 @@ void test_3(void)
 
 #ifdef VECTOR_TEST
 
-static int _test_npass = 0;
-static int _test_nfail = 0;
-
-static void _test_check(bool cond, const char* msg)
+void vector_test_pod(TestRunner* r)
 {
-    print_emin(msg, set(sep = "", end = ""));
-    if (cond)
-    {
-        println_emin(set_fg_idx(COLOR_BRIGHT_GREEN), "PASS", reset_style());
-        _test_npass++;
-    }
-    else
-    {
-        println_emin(set_fg_idx(COLOR_BRIGHT_RED), "FAIL", reset_style());
-        _test_nfail++;
-    }
-}
-
-void vector_test_pod(void)
-{
-    println_emin("=== Vector POD (f32) Tests ===");
-
-    // 1. Create / Destroy / IsEmpty
+    TEST_GROUP(r, "Create / Destroy / IsEmpty");
     {
         Vec(f32) v;
         Create(Vec(f32), &v);
-        _test_check(VCall(Vec(f32), &v, is_empty), "Create/IsEmpty: ");
+        TEST_ASSERT(r, VCall(Vec(f32), &v, is_empty));
         v.vptr->destroy(&v);
     }
 
-    // 2. PushBack / At
+    TEST_GROUP(r, "PushBack / At");
     {
         Vec(f32) v;
         Create(Vec(f32), &v);
         FT(Vec(f32), &v)->push_back(&v, 10.0f);
         FT(Vec(f32), &v)->push_back(&v, 20.0f);
         FT(Vec(f32), &v)->push_back(&v, 30.0f);
-        _test_check(!VCall(Vec(f32), &v, is_empty), "PushBack: ");
+        TEST_ASSERT(r, !VCall(Vec(f32), &v, is_empty));
 
         f32* a0 = FT(Vec(f32), &v)->at(&v, 0);
         f32* a1 = FT(Vec(f32), &v)->at(&v, 1);
         f32* a2 = FT(Vec(f32), &v)->at(&v, 2);
-        _test_check(*a0 == 10.0f && *a1 == 20.0f && *a2 == 30.0f, "At access: ");
+        TEST_ASSERT(r, *a0 == 10.0f && *a1 == 20.0f && *a2 == 30.0f);
 
         v.vptr->destroy(&v);
     }
 
-    // 3. Front / Back
+    TEST_GROUP(r, "Front / Back");
     {
         Vec(f32) v;
         Create(Vec(f32), &v);
@@ -138,11 +126,11 @@ void vector_test_pod(void)
         FT(Vec(f32), &v)->push_back(&v, 3.0f);
         f32* f = FT(Vec(f32), &v)->front(&v);
         f32* b = FT(Vec(f32), &v)->back(&v);
-        _test_check(*f == 1.0f && *b == 3.0f, "Front/Back: ");
+        TEST_ASSERT(r, *f == 1.0f && *b == 3.0f);
         v.vptr->destroy(&v);
     }
 
-    // 4. PopBack
+    TEST_GROUP(r, "PopBack");
     {
         Vec(f32) v;
         Create(Vec(f32), &v);
@@ -151,11 +139,11 @@ void vector_test_pod(void)
         FT(Vec(f32), &v)->push_back(&v, 3.0f);
         FT(Vec(f32), &v)->pop_back(&v);
         f32* b = FT(Vec(f32), &v)->back(&v);
-        _test_check(*b == 2.0f, "PopBack: ");
+        TEST_ASSERT(r, *b == 2.0f);
         v.vptr->destroy(&v);
     }
 
-    // 5. Erase
+    TEST_GROUP(r, "Erase");
     {
         Vec(f32) v;
         Create(Vec(f32), &v);
@@ -164,43 +152,43 @@ void vector_test_pod(void)
         FT(Vec(f32), &v)->erase(&v, 1);
         f32* a0 = FT(Vec(f32), &v)->at(&v, 0);
         f32* a1 = FT(Vec(f32), &v)->at(&v, 1);
-        _test_check(*a0 == 1.0f && *a1 == 3.0f, "Erase middle: ");
+        TEST_ASSERT(r, *a0 == 1.0f && *a1 == 3.0f);
 
         FT(Vec(f32), &v)->erase(&v, 3);
         f32* b = FT(Vec(f32), &v)->back(&v);
-        _test_check(*b == 4.0f, "Erase last: ");
+        TEST_ASSERT(r, *b == 4.0f);
 
         FT(Vec(f32), &v)->erase(&v, 0);
         f32* f = FT(Vec(f32), &v)->front(&v);
-        _test_check(*f == 3.0f, "Erase first: ");
+        TEST_ASSERT(r, *f == 3.0f);
         v.vptr->destroy(&v);
     }
 
-    // 6. Reserve
+    TEST_GROUP(r, "Reserve");
     {
         Vec(f32) v;
         Create(Vec(f32), &v);
         FT(Vec(f32), &v)->reserve(&v, 1000);
-        _test_check(true, "Reserve: ");
+        TEST_ASSERT(r, true);
         v.vptr->destroy(&v);
     }
 
-    // 7. Clear / Re-push
+    TEST_GROUP(r, "Clear / Re-push");
     {
         Vec(f32) v;
         Create(Vec(f32), &v);
         for (f32 i = 0; i < 10; i++)
             FT(Vec(f32), &v)->push_back(&v, i);
         FT(Vec(f32), &v)->clear(&v);
-        _test_check(VCall(Vec(f32), &v, is_empty), "Clear: ");
+        TEST_ASSERT(r, VCall(Vec(f32), &v, is_empty));
 
         FT(Vec(f32), &v)->push_back(&v, 42.0f);
         f32* a = FT(Vec(f32), &v)->at(&v, 0);
-        _test_check(*a == 42.0f, "Push after clear: ");
+        TEST_ASSERT(r, *a == 42.0f);
         v.vptr->destroy(&v);
     }
 
-    // 8. Foreach iteration
+    TEST_GROUP(r, "Foreach iteration");
     {
         Vec(f32) v;
         Create(Vec(f32), &v);
@@ -211,11 +199,11 @@ void vector_test_pod(void)
         {
             sum += num;
         }
-        _test_check(sum == 10.0f, "Foreach sum: ");
+        TEST_ASSERT(r, sum == 10.0f);
         v.vptr->destroy(&v);
     }
 
-    // 9. Iterator
+    TEST_GROUP(r, "Iterator");
     {
         Vec(f32) v;
         Create(Vec(f32), &v);
@@ -224,21 +212,21 @@ void vector_test_pod(void)
 
         VecIter(f32) it = VCall(Vec(f32), &v, begin);
         VecIter(f32) end_it = VCall(Vec(f32), &v, end);
-        _test_check(!VCall(VecIter(f32), &it, equals, &end_it), "Iterator begin != end: ");
+        TEST_ASSERT(r, !VCall(VecIter(f32), &it, equals, &end_it));
 
         f32 val = VCall(VecIter(f32), &it, get);
-        _test_check(val == 100.0f, "Iterator get 1st: ");
+        TEST_ASSERT(r, val == 100.0f);
 
         VCall(VecIter(f32), &it, next);
         val = VCall(VecIter(f32), &it, get);
-        _test_check(val == 200.0f, "Iterator get 2nd: ");
+        TEST_ASSERT(r, val == 200.0f);
 
         VCall(VecIter(f32), &it, next);
-        _test_check(VCall(VecIter(f32), &it, equals, &end_it), "Iterator at end: ");
+        TEST_ASSERT(r, VCall(VecIter(f32), &it, equals, &end_it));
         v.vptr->destroy(&v);
     }
 
-    // 10. Large scale
+    TEST_GROUP(r, "Large scale (10000 elements)");
     {
         Vec(f32) v;
         Create(Vec(f32), &v);
@@ -254,26 +242,26 @@ void vector_test_pod(void)
                 ok = false; break;
             }
         }
-        _test_check(ok, "10000 elements: ");
+        TEST_ASSERT(r, ok);
 
         f32* data = FT(Vec(f32), &v)->data(&v);
-        _test_check(data[0] == 0.0f && data[9999] == 9999.0f, "Data pointer: ");
+        TEST_ASSERT(r, data[0] == 0.0f && data[9999] == 9999.0f);
         v.vptr->destroy(&v);
     }
 
-    // 11. EmplaceBack POD
+    TEST_GROUP(r, "EmplaceBack POD");
     {
         Vec(f32) v;
         Create(Vec(f32), &v);
         f32* p = (f32*)FT(Vec(f32), &v)->emplace_back(&v);
-        _test_check(p != NULL && !VCall(Vec(f32), &v, is_empty), "EmplaceBack POD: ");
+        TEST_ASSERT(r, p != NULL && !VCall(Vec(f32), &v, is_empty));
         *p = 3.14f;
         f32* b = FT(Vec(f32), &v)->back(&v);
-        _test_check(*b == 3.14f, "EmplaceBack value: ");
+        TEST_ASSERT(r, *b == 3.14f);
         v.vptr->destroy(&v);
     }
 
-    // 12. SwapErase POD
+    TEST_GROUP(r, "SwapErase POD");
     {
         Vec(f32) v;
         Create(Vec(f32), &v);
@@ -283,26 +271,24 @@ void vector_test_pod(void)
         FT(Vec(f32), &v)->swap_erase(&v, 1);
         f32* a0 = FT(Vec(f32), &v)->at(&v, 0);
         f32* a1 = FT(Vec(f32), &v)->at(&v, 1);
-        _test_check(*a0 == 0.0f && *a1 == 3.0f, "SwapErase middle: ");
+        TEST_ASSERT(r, *a0 == 0.0f && *a1 == 3.0f);
         f32* b = FT(Vec(f32), &v)->back(&v);
-        _test_check(*b == 2.0f, "SwapErase back: ");
+        TEST_ASSERT(r, *b == 2.0f);
         v.vptr->destroy(&v);
     }
 }
 
-void vector_test_string(void)
+void vector_test_string(TestRunner* r)
 {
-    println_emin("=== Vector String Tests ===");
-
-    // 1. Create / Destroy
+    TEST_GROUP(r, "Create / Destroy");
     {
         Vec(String) v;
         Create(Vec(String), &v);
-        _test_check(VCall(Vec(String), &v, is_empty), "Create empty: ");
+        TEST_ASSERT(r, VCall(Vec(String), &v, is_empty));
         v.vptr->destroy(&v);
     }
 
-    // 2. PushBack / At
+    TEST_GROUP(r, "PushBack / At");
     {
         Vec(String) v;
         Create(Vec(String), &v);
@@ -322,13 +308,13 @@ void vector_test_string(void)
         const String* a0 = FT(Vec(String), &v)->at(&v, 0);
         const String* a1 = FT(Vec(String), &v)->at(&v, 1);
         const String* a2 = FT(Vec(String), &v)->at(&v, 2);
-        _test_check(strcmp(a0->data, "hello") == 0, "String[0]: ");
-        _test_check(strcmp(a1->data, "world") == 0, "String[1]: ");
-        _test_check(strcmp(a2->data, "test") == 0, "String[2]: ");
+        TEST_ASSERT(r, strcmp(a0->data, "hello") == 0);
+        TEST_ASSERT(r, strcmp(a1->data, "world") == 0);
+        TEST_ASSERT(r, strcmp(a2->data, "test") == 0);
         v.vptr->destroy(&v);
     }
 
-    // 3. Clear
+    TEST_GROUP(r, "Clear");
     {
         Vec(String) v;
         Create(Vec(String), &v);
@@ -339,17 +325,17 @@ void vector_test_string(void)
             Call(String, s, Delete);
         }
         FT(Vec(String), &v)->clear(&v);
-        _test_check(VCall(Vec(String), &v, is_empty), "Clear strings: ");
+        TEST_ASSERT(r, VCall(Vec(String), &v, is_empty));
 
         String* s = format("after_clear");
         FT(Vec(String), &v)->push_back(&v, *s);
         Call(String, s, Delete);
         const String* a = FT(Vec(String), &v)->at(&v, 0);
-        _test_check(strcmp(a->data, "after_clear") == 0, "Re-push string: ");
+        TEST_ASSERT(r, strcmp(a->data, "after_clear") == 0);
         v.vptr->destroy(&v);
     }
 
-    // 4. Erase string
+    TEST_GROUP(r, "Erase string");
     {
         Vec(String) v;
         Create(Vec(String), &v);
@@ -363,11 +349,11 @@ void vector_test_string(void)
         FT(Vec(String), &v)->erase(&v, 1);
         const String* a0 = FT(Vec(String), &v)->at(&v, 0);
         const String* a1 = FT(Vec(String), &v)->at(&v, 1);
-        _test_check(strcmp(a0->data, "aaa") == 0 && strcmp(a1->data, "ccc") == 0, "Erase string: ");
+        TEST_ASSERT(r, strcmp(a0->data, "aaa") == 0 && strcmp(a1->data, "ccc") == 0);
         v.vptr->destroy(&v);
     }
 
-    // 5. Foreach
+    TEST_GROUP(r, "Foreach");
     {
         Vec(String) v;
         Create(Vec(String), &v);
@@ -382,22 +368,22 @@ void vector_test_string(void)
         {
             count++;
         }
-        _test_check(count == 3, "Foreach strings: ");
+        TEST_ASSERT(r, count == 3);
         v.vptr->destroy(&v);
     }
 
-    // 6. EmplaceBack string (in-place construct)
+    TEST_GROUP(r, "EmplaceBack string");
     {
         Vec(String) v;
         Create(Vec(String), &v);
         String* p = (String*)FT(Vec(String), &v)->emplace_back(&v);
-        _test_check(p != NULL && p->data != NULL, "EmplaceBack string: ");
+        TEST_ASSERT(r, p != NULL && p->data != NULL);
         Call(String, p, Append, "in_place");
-        _test_check(strcmp(p->data, "in_place") == 0, "EmplaceBack assign: ");
+        TEST_ASSERT(r, strcmp(p->data, "in_place") == 0);
         v.vptr->destroy(&v);
     }
 
-    // 7. SwapErase string
+    TEST_GROUP(r, "SwapErase string");
     {
         Vec(String) v;
         Create(Vec(String), &v);
@@ -413,37 +399,35 @@ void vector_test_string(void)
         const String* a0 = FT(Vec(String), &v)->at(&v, 0);
         const String* a1 = FT(Vec(String), &v)->at(&v, 1);
         const String* a2 = FT(Vec(String), &v)->at(&v, 2);
-        _test_check(strcmp(a0->data, "aaa") == 0 && strcmp(a1->data, "ddd") == 0, "SwapErase string: ");
-        _test_check(strcmp(a2->data, "ccc") == 0, "SwapErase unchanged: ");
+        TEST_ASSERT(r, strcmp(a0->data, "aaa") == 0 && strcmp(a1->data, "ddd") == 0);
+        TEST_ASSERT(r, strcmp(a2->data, "ccc") == 0);
         v.vptr->destroy(&v);
     }
 }
 
-void vector_test_edge(void)
+void vector_test_edge(TestRunner* r)
 {
-    println_emin("=== Vector Edge Case Tests ===");
-
-    // 1. Large reserve
+    TEST_GROUP(r, "Large reserve");
     {
         Vec(f32) v;
         Create(Vec(f32), &v);
         FT(Vec(f32), &v)->reserve(&v, 100000);
-        _test_check(true, "Large reserve: ");
+        TEST_ASSERT(r, true);
         v.vptr->destroy(&v);
     }
 
-    // 2. Resize grow
+    TEST_GROUP(r, "Resize grow");
     {
         Vec(f32) v;
         Create(Vec(f32), &v);
         FT(Vec(f32), &v)->resize(&v, 50);
-        _test_check(!VCall(Vec(f32), &v, is_empty), "Resize grow: ");
+        TEST_ASSERT(r, !VCall(Vec(f32), &v, is_empty));
         f32* a = FT(Vec(f32), &v)->at(&v, 49);
-        _test_check(*a == 0.0f, "Resize zero-init: ");
+        TEST_ASSERT(r, *a == 0.0f);
         v.vptr->destroy(&v);
     }
 
-    // 3. Resize shrink
+    TEST_GROUP(r, "Resize shrink");
     {
         Vec(f32) v;
         Create(Vec(f32), &v);
@@ -451,11 +435,11 @@ void vector_test_edge(void)
             FT(Vec(f32), &v)->push_back(&v, i);
         FT(Vec(f32), &v)->resize(&v, 3);
         f32* a = FT(Vec(f32), &v)->at(&v, 2);
-        _test_check(*a == 2.0f, "Resize shrink: ");
+        TEST_ASSERT(r, *a == 2.0f);
         v.vptr->destroy(&v);
     }
 
-    // 4. Multiple create/destroy
+    TEST_GROUP(r, "100 create/destroy cycles");
     {
         for (int i = 0; i < 100; i++)
         {
@@ -465,16 +449,16 @@ void vector_test_edge(void)
                 FT(Vec(f32), &v)->push_back(&v, j);
             v.vptr->destroy(&v);
         }
-        _test_check(true, "100 cycles: ");
+        TEST_ASSERT(r, true);
     }
 
-    // 5. Integer types
+    TEST_GROUP(r, "Integer types Vec(i32) Vec(u64)");
     {
         Vec(i32) vi;
         Create(Vec(i32), &vi);
         FT(Vec(i32), &vi)->push_back(&vi, -42);
         i32* a = FT(Vec(i32), &vi)->at(&vi, 0);
-        _test_check(*a == -42, "Vec(i32): ");
+        TEST_ASSERT(r, *a == -42);
         vi.vptr->destroy(&vi);
     }
     {
@@ -482,42 +466,626 @@ void vector_test_edge(void)
         Create(Vec(u64), &vu);
         FT(Vec(u64), &vu)->push_back(&vu, 123456789ULL);
         u64* a = FT(Vec(u64), &vu)->at(&vu, 0);
-        _test_check(*a == 123456789ULL, "Vec(u64): ");
+        TEST_ASSERT(r, *a == 123456789ULL);
         vu.vptr->destroy(&vu);
     }
 
-    // 6. Vec(Object)
+    TEST_GROUP(r, "Vec(Object)");
     {
         Vec(Object) vo;
         Create(Vec(Object), &vo);
         Object obj;
         Object_Create(&obj);
         FT(Vec(Object), &vo)->push_back(&vo, obj);
-        _test_check(!VCall(Vec(Object), &vo, is_empty), "Vec(Object): ");
+        TEST_ASSERT(r, !VCall(Vec(Object), &vo, is_empty));
         vo.vptr->destroy(&vo);
     }
 }
 
 void vector_test(void)
 {
-    _test_npass = 0;
-    _test_nfail = 0;
+    TEST_INIT(runner, "Vector Tests");
+    TEST_BEGIN(&runner);
 
     #ifdef VECTOR_TEST_POD
-    vector_test_pod();
+    vector_test_pod(&runner);
     #endif
     #ifdef VECTOR_TEST_STRING
-    vector_test_string();
+    vector_test_string(&runner);
     #endif
     #ifdef VECTOR_TEST_EDGE
-    vector_test_edge();
+    vector_test_edge(&runner);
     #endif
 
-    println_emin();
-    println_emin("Results:");
-    println_emin(set_fg_idx(COLOR_BRIGHT_GREEN), "PASS ", _test_npass,
-        set_fg_idx(COLOR_BRIGHT_RED), "FAIL", _test_nfail, reset_style());
-    println_emin("Total:", _test_npass + _test_nfail);
+    TEST_END(&runner);
+}
+
+#endif
+
+#ifdef HASHMAP_TEST
+
+void hashmap_test_pod(TestRunner* r)
+{
+    TEST_GROUP(r, "Create / Size / Empty");
+    {
+        HashMap(i32, f64) m;
+        Create(HashMap(i32, f64), &m);
+        TEST_ASSERT(r, Call(HashMap(i32, f64), &m, Size) == 0);
+        TEST_ASSERT(r, Call(HashMap(i32, f64), &m, IsEmpty));
+        m.vptr->destroy(&m);
+    }
+
+    TEST_GROUP(r, "Insert / Find");
+    {
+        HashMap(i32, f64) m;
+        Create(HashMap(i32, f64), &m);
+        Call(HashMap(i32, f64), &m, Insert, 1, 10.5);
+        Call(HashMap(i32, f64), &m, Insert, 2, 20.5);
+        Call(HashMap(i32, f64), &m, Insert, 3, 30.5);
+
+        f64* v1 = Call(HashMap(i32, f64), &m, At, 1);
+        f64* v2 = Call(HashMap(i32, f64), &m, At, 2);
+        f64* v3 = Call(HashMap(i32, f64), &m, At, 3);
+        TEST_ASSERT(r, v1 && *v1 == 10.5 && v2 && *v2 == 20.5 && v3 && *v3 == 30.5);
+        TEST_ASSERT(r, Call(HashMap(i32, f64), &m, Size) == 3);
+
+        f64* vn = Call(HashMap(i32, f64), &m, At, 99);
+        TEST_ASSERT(r, vn == NULL);
+        m.vptr->destroy(&m);
+    }
+
+    TEST_GROUP(r, "Insert overwrite");
+    {
+        HashMap(i32, f64) m;
+        Create(HashMap(i32, f64), &m);
+        Call(HashMap(i32, f64), &m, Insert, 1, 100.0);
+        Call(HashMap(i32, f64), &m, Insert, 1, 200.0);
+        f64* v = Call(HashMap(i32, f64), &m, At, 1);
+        TEST_ASSERT(r, v && *v == 200.0);
+        TEST_ASSERT(r, Call(HashMap(i32, f64), &m, Size) == 1);
+        m.vptr->destroy(&m);
+    }
+
+    TEST_GROUP(r, "Contains");
+    {
+        HashMap(i32, f64) m;
+        Create(HashMap(i32, f64), &m);
+        Call(HashMap(i32, f64), &m, Insert, 5, 50.0);
+        TEST_ASSERT(r, Call(HashMap(i32, f64), &m, Contains, 5));
+        TEST_ASSERT(r, !Call(HashMap(i32, f64), &m, Contains, 99));
+        m.vptr->destroy(&m);
+    }
+
+    TEST_GROUP(r, "Erase");
+    {
+        HashMap(i32, f64) m;
+        Create(HashMap(i32, f64), &m);
+        Call(HashMap(i32, f64), &m, Insert, 1, 10.0);
+        Call(HashMap(i32, f64), &m, Insert, 2, 20.0);
+        TEST_ASSERT(r, Call(HashMap(i32, f64), &m, Erase, 1));
+        TEST_ASSERT(r, Call(HashMap(i32, f64), &m, At, 1) == NULL);
+        TEST_ASSERT(r, Call(HashMap(i32, f64), &m, At, 2) != NULL);
+        TEST_ASSERT(r, Call(HashMap(i32, f64), &m, Size) == 1);
+
+        TEST_ASSERT(r, !Call(HashMap(i32, f64), &m, Erase, 99));
+        m.vptr->destroy(&m);
+    }
+
+    TEST_GROUP(r, "Clear / Re-insert");
+    {
+        HashMap(i32, f64) m;
+        Create(HashMap(i32, f64), &m);
+        Call(HashMap(i32, f64), &m, Insert, 1, 1.0);
+        Call(HashMap(i32, f64), &m, Insert, 2, 2.0);
+        Call(HashMap(i32, f64), &m, Insert, 3, 3.0);
+        Call(HashMap(i32, f64), &m, Clear);
+        TEST_ASSERT(r, Call(HashMap(i32, f64), &m, Size) == 0);
+        TEST_ASSERT(r, Call(HashMap(i32, f64), &m, At, 1) == NULL);
+
+        Call(HashMap(i32, f64), &m, Insert, 42, 42.0);
+        f64* v = Call(HashMap(i32, f64), &m, At, 42);
+        TEST_ASSERT(r, v && *v == 42.0);
+        m.vptr->destroy(&m);
+    }
+
+    TEST_GROUP(r, "Tombstone reuse");
+    {
+        HashMap(i32, f64) m;
+        Create(HashMap(i32, f64), &m);
+        Call(HashMap(i32, f64), &m, Insert, 1, 1.0);
+        Call(HashMap(i32, f64), &m, Insert, 2, 2.0);
+        Call(HashMap(i32, f64), &m, Erase, 1);
+        Call(HashMap(i32, f64), &m, Insert, 3, 3.0);
+        TEST_ASSERT(r, Call(HashMap(i32, f64), &m, Size) == 2);
+        f64* v2 = Call(HashMap(i32, f64), &m, At, 2);
+        f64* v3 = Call(HashMap(i32, f64), &m, At, 3);
+        TEST_ASSERT(r, v2 && *v2 == 2.0 && v3 && *v3 == 3.0);
+        m.vptr->destroy(&m);
+    }
+
+    TEST_GROUP(r, "Rehash (1000 inserts)");
+    {
+        HashMap(i32, f64) m;
+        Create(HashMap(i32, f64), &m);
+        for (i32 i = 0; i < 1000; i++)
+            Call(HashMap(i32, f64), &m, Insert, i, (f64)i * 1.5);
+
+        TEST_ASSERT(r, Call(HashMap(i32, f64), &m, Size) == 1000);
+
+        bool ok = true;
+        for (i32 i = 0; i < 1000; i++)
+        {
+            f64* v = Call(HashMap(i32, f64), &m, At, i);
+            if (!v || *v != (f64)i * 1.5)
+            {
+                ok = false; break;
+            }
+        }
+        TEST_ASSERT(r, ok);
+
+        for (i32 i = 0; i < 500; i++)
+            Call(HashMap(i32, f64), &m, Erase, i);
+        TEST_ASSERT(r, Call(HashMap(i32, f64), &m, Size) == 500);
+        m.vptr->destroy(&m);
+    }
+
+    TEST_GROUP(r, "Independent maps");
+    {
+        HashMap(i32, f64) a, b;
+        Create(HashMap(i32, f64), &a);
+        Create(HashMap(i32, f64), &b);
+        Call(HashMap(i32, f64), &a, Insert, 1, 100.0);
+        Call(HashMap(i32, f64), &b, Insert, 1, 200.0);
+        f64* va = Call(HashMap(i32, f64), &a, At, 1);
+        f64* vb = Call(HashMap(i32, f64), &b, At, 1);
+        TEST_ASSERT(r, va && *va == 100.0 && vb && *vb == 200.0);
+        a.vptr->destroy(&a);
+        b.vptr->destroy(&b);
+    }
+
+    TEST_GROUP(r, "Iterator basic");
+    {
+        HashMap(i32, f64) m;
+        Create(HashMap(i32, f64), &m);
+        Call(HashMap(i32, f64), &m, Insert, 1, 10.0);
+        Call(HashMap(i32, f64), &m, Insert, 2, 20.0);
+        Call(HashMap(i32, f64), &m, Insert, 3, 30.0);
+
+        HashMapIter(i32, f64) it = VCall(HashMap(i32, f64), &m, begin);
+        HashMapIter(i32, f64) end = VCall(HashMap(i32, f64), &m, end);
+
+        bool ok = true;
+        f64 sum = 0;
+        int count = 0;
+        while (!VCall(HashMapIter(i32, f64), &it, equals, &end))
+        {
+            sum += *VCall(HashMapIter(i32, f64), &it, get).value;
+            count++;
+            VCall(HashMapIter(i32, f64), &it, next);
+        }
+        TEST_ASSERT(r, count == 3 && sum == 60.0);
+
+        m.vptr->destroy(&m);
+    }
+
+    TEST_GROUP(r, "Iterator key/value access");
+    {
+        HashMap(i32, f64) m;
+        Create(HashMap(i32, f64), &m);
+        Call(HashMap(i32, f64), &m, Insert, 42, 3.14);
+        Call(HashMap(i32, f64), &m, Insert, 99, 2.71);
+
+        HashMapIter(i32, f64) it = VCall(HashMap(i32, f64), &m, begin);
+        HashMapIter(i32, f64) end = VCall(HashMap(i32, f64), &m, end);
+
+        int found_keys[2] = { 0 };
+        while (!VCall(HashMapIter(i32, f64), &it, equals, &end))
+        {
+            i32* k = VCall(HashMapIter(i32, f64), &it, key);
+            f64* v = VCall(HashMapIter(i32, f64), &it, value);
+            if (*k == 42)
+            {
+                TEST_ASSERT(r, *v == 3.14); found_keys[0] = 1;
+            }
+            if (*k == 99)
+            {
+                TEST_ASSERT(r, *v == 2.71); found_keys[1] = 1;
+            }
+            VCall(HashMapIter(i32, f64), &it, next);
+        }
+        TEST_ASSERT(r, found_keys[0] && found_keys[1]);
+
+        m.vptr->destroy(&m);
+    }
+
+    TEST_GROUP(r, "Foreach Pair");
+    {
+        HashMap(i32, f64) m;
+        Create(HashMap(i32, f64), &m);
+        Call(HashMap(i32, f64), &m, Insert, 1, 10.0);
+        Call(HashMap(i32, f64), &m, Insert, 2, 20.0);
+        Call(HashMap(i32, f64), &m, Insert, 3, 30.0);
+
+        f64 sum = 0;
+        int count = 0;
+        foreach(HashMap(i32, f64), p, m)
+        {
+            sum += *p.value;
+            count++;
+        }
+        TEST_ASSERT(r, count == 3 && sum == 60.0);
+        m.vptr->destroy(&m);
+    }
+
+    TEST_GROUP(r, "TryEmplace new key");
+    {
+        HashMap(i32, f64) m;
+        Create(HashMap(i32, f64), &m);
+        i32 k = 42; f64 v = 3.14;
+        TEST_ASSERT(r, Call(HashMap(i32, f64), &m, TryEmplace, &k, &v));
+        TEST_ASSERT(r, Call(HashMap(i32, f64), &m, Size) == 1);
+        f64* found = Call(HashMap(i32, f64), &m, At, 42);
+        TEST_ASSERT(r, found && *found == 3.14);
+        m.vptr->destroy(&m);
+    }
+
+    TEST_GROUP(r, "TryEmplace existing key");
+    {
+        HashMap(i32, f64) m;
+        Create(HashMap(i32, f64), &m);
+        Call(HashMap(i32, f64), &m, Insert, 1, 100.0);
+        i32 k = 1; f64 v = 999.0;
+        TEST_ASSERT(r, !Call(HashMap(i32, f64), &m, TryEmplace, &k, &v));
+        f64* found = Call(HashMap(i32, f64), &m, At, 1);
+        TEST_ASSERT(r, found && *found == 100.0);
+        m.vptr->destroy(&m);
+    }
+
+    TEST_GROUP(r, "TryEmplace rehash (1000)");
+    {
+        HashMap(i32, f64) m;
+        Create(HashMap(i32, f64), &m);
+        for (i32 i = 0; i < 1000; i++)
+        {
+            f64 val = (f64)i;
+            Call(HashMap(i32, f64), &m, TryEmplace, &i, &val);
+        }
+        TEST_ASSERT(r, Call(HashMap(i32, f64), &m, Size) == 1000);
+        bool ok = true;
+        for (i32 i = 0; i < 1000; i++)
+        {
+            f64* fv = Call(HashMap(i32, f64), &m, At, i);
+            if (!fv || *fv != (f64)i)
+            {
+                ok = false; break;
+            }
+        }
+        TEST_ASSERT(r, ok);
+        m.vptr->destroy(&m);
+    }
+
+    TEST_GROUP(r, "Find returns iterator");
+    {
+        HashMap(i32, f64) m;
+        Create(HashMap(i32, f64), &m);
+        Call(HashMap(i32, f64), &m, Insert, 1, 10.0);
+        Call(HashMap(i32, f64), &m, Insert, 2, 20.0);
+        Call(HashMap(i32, f64), &m, Insert, 3, 30.0);
+
+        HashMapIter(i32, f64) end = VCall(HashMap(i32, f64), &m, end);
+
+        HashMapIter(i32, f64) it = Call(HashMap(i32, f64), &m, Find, 2);
+        TEST_ASSERT(r, !VCall(HashMapIter(i32, f64), &it, equals, &end));
+        TEST_ASSERT(r, *VCall(HashMapIter(i32, f64), &it, get).value == 20.0);
+        TEST_ASSERT(r, *VCall(HashMapIter(i32, f64), &it, key) == 2);
+
+        it = Call(HashMap(i32, f64), &m, Find, 99);
+        TEST_ASSERT(r, VCall(HashMapIter(i32, f64), &it, equals, &end));
+        m.vptr->destroy(&m);
+    }
+
+    TEST_GROUP(r, "Count");
+    {
+        HashMap(i32, f64) m;
+        Create(HashMap(i32, f64), &m);
+        TEST_ASSERT(r, Call(HashMap(i32, f64), &m, Count, 1) == 0);
+        Call(HashMap(i32, f64), &m, Insert, 1, 1.0);
+        TEST_ASSERT(r, Call(HashMap(i32, f64), &m, Count, 1) == 1);
+        TEST_ASSERT(r, Call(HashMap(i32, f64), &m, Count, 2) == 0);
+        m.vptr->destroy(&m);
+    }
+
+    TEST_GROUP(r, "Rehash explicit");
+    {
+        HashMap(i32, f64) m;
+        Create(HashMap(i32, f64), &m);
+        for (i32 i = 0; i < 100; i++)
+            Call(HashMap(i32, f64), &m, Insert, i, (f64)i);
+        TEST_ASSERT(r, Call(HashMap(i32, f64), &m, Size) == 100);
+        Call(HashMap(i32, f64), &m, Rehash, 200);
+        bool ok = true;
+        for (i32 i = 0; i < 100; i++)
+        {
+            f64* v = Call(HashMap(i32, f64), &m, At, i);
+            if (!v || *v != (f64)i)
+            {
+                ok = false; break;
+            }
+        }
+        TEST_ASSERT(r, ok);
+        m.vptr->destroy(&m);
+    }
+}
+
+void hashmap_test_string(TestRunner* r)
+{
+    TEST_GROUP(r, "Insert / Find String key");
+    {
+        HashMap(String, i32) m;
+        Create(HashMap(String, i32), &m);
+
+        String* k1 = New(String, 16); Call(String, k1, Append, "hello");
+        String* k2 = New(String, 16); Call(String, k2, Append, "world");
+
+        Call(HashMap(String, i32), &m, Insert, *k1, 100);
+        Call(HashMap(String, i32), &m, Insert, *k2, 200);
+
+        i32* v1 = Call(HashMap(String, i32), &m, At, *k1);
+        i32* v2 = Call(HashMap(String, i32), &m, At, *k2);
+        TEST_ASSERT(r, v1 && *v1 == 100);
+        TEST_ASSERT(r, v2 && *v2 == 200);
+        TEST_ASSERT(r, Call(HashMap(String, i32), &m, Size) == 2);
+
+        Call(String, k1, Delete);
+        Call(String, k2, Delete);
+        m.vptr->destroy(&m);
+    }
+
+    TEST_GROUP(r, "Same content match");
+    {
+        HashMap(String, i32) m;
+        Create(HashMap(String, i32), &m);
+
+        String* a = New(String, 16); Call(String, a, Append, "key");
+        String* b = New(String, 16); Call(String, b, Append, "key");
+
+        Call(HashMap(String, i32), &m, Insert, *a, 42);
+        i32* v = Call(HashMap(String, i32), &m, At, *b);
+        TEST_ASSERT(r, v && *v == 42);
+
+        Call(String, a, Delete);
+        Call(String, b, Delete);
+        m.vptr->destroy(&m);
+    }
+
+    TEST_GROUP(r, "Clear string keys");
+    {
+        HashMap(String, i32) m;
+        Create(HashMap(String, i32), &m);
+        for (int i = 0; i < 10; i++)
+        {
+            String* k = New(String, 16);
+            char buf[32]; snprintf(buf, sizeof(buf), "k%d", i);
+            Call(String, k, Append, buf);
+            Call(HashMap(String, i32), &m, Insert, *k, i);
+            Call(String, k, Delete);
+        }
+        TEST_ASSERT(r, Call(HashMap(String, i32), &m, Size) == 10);
+        Call(HashMap(String, i32), &m, Clear);
+        TEST_ASSERT(r, Call(HashMap(String, i32), &m, Size) == 0);
+        m.vptr->destroy(&m);
+    }
+
+    TEST_GROUP(r, "TryEmplace String key");
+    {
+        HashMap(String, i32) m;
+        Create(HashMap(String, i32), &m);
+
+        String* k = New(String, 16); Call(String, k, Append, "hello");
+        i32 v = 42;
+        TEST_ASSERT(r, Call(HashMap(String, i32), &m, TryEmplace, k, &v));
+        TEST_ASSERT(r, Call(HashMap(String, i32), &m, Size) == 1);
+        i32* found = Call(HashMap(String, i32), &m, At, *k);
+        TEST_ASSERT(r, found && *found == 42);
+        Call(String, k, Delete);
+
+        m.vptr->destroy(&m);
+    }
+
+    TEST_GROUP(r, "TryEmplace existing String");
+    {
+        HashMap(String, i32) m;
+        Create(HashMap(String, i32), &m);
+
+        String* k = New(String, 16); Call(String, k, Append, "key");
+        String* k2 = New(String, 16); Call(String, k2, Append, "key");
+        Call(HashMap(String, i32), &m, Insert, *k, 100);
+        i32 v = 999;
+        TEST_ASSERT(r, !Call(HashMap(String, i32), &m, TryEmplace, k2, &v));
+        i32* found = Call(HashMap(String, i32), &m, At, *k);
+        TEST_ASSERT(r, found && *found == 100);
+        Call(String, k, Delete);
+        Call(String, k2, Delete);
+
+        m.vptr->destroy(&m);
+    }
+}
+
+void hashmap_test_edge(TestRunner* r)
+{
+    TEST_GROUP(r, "Empty map ops (no crash)");
+    {
+        HashMap(i32, f64) m;
+        Create(HashMap(i32, f64), &m);
+        TEST_ASSERT(r, Call(HashMap(i32, f64), &m, At, 1) == NULL);
+        TEST_ASSERT(r, !Call(HashMap(i32, f64), &m, Erase, 1));
+        TEST_ASSERT(r, !Call(HashMap(i32, f64), &m, Contains, 1));
+        Call(HashMap(i32, f64), &m, Clear);
+        TEST_ASSERT(r, true);
+        m.vptr->destroy(&m);
+    }
+
+    TEST_GROUP(r, "100x overwrite same key");
+    {
+        HashMap(i32, f64) m;
+        Create(HashMap(i32, f64), &m);
+        for (i32 i = 0; i < 100; i++)
+            Call(HashMap(i32, f64), &m, Insert, 42, (f64)i);
+        f64* v = Call(HashMap(i32, f64), &m, At, 42);
+        TEST_ASSERT(r, v && *v == 99.0);
+        TEST_ASSERT(r, Call(HashMap(i32, f64), &m, Size) == 1);
+        m.vptr->destroy(&m);
+    }
+
+    TEST_GROUP(r, "50 create/destroy cycles");
+    {
+        for (int i = 0; i < 50; i++)
+        {
+            HashMap(i32, f64) m;
+            Create(HashMap(i32, f64), &m);
+            for (i32 j = 0; j < 10; j++)
+                Call(HashMap(i32, f64), &m, Insert, j, (f64)j);
+            m.vptr->destroy(&m);
+        }
+        TEST_ASSERT(r, true);
+    }
+
+    TEST_GROUP(r, "ShrinkToFit after erase");
+    {
+        HashMap(i32, f64) m;
+        Create(HashMap(i32, f64), &m);
+        for (i32 i = 0; i < 100; i++)
+            Call(HashMap(i32, f64), &m, Insert, i, (f64)i);
+        TEST_ASSERT(r, Call(HashMap(i32, f64), &m, Size) == 100);
+
+        for (i32 i = 10; i < 100; i++)
+            Call(HashMap(i32, f64), &m, Erase, i);
+        TEST_ASSERT(r, Call(HashMap(i32, f64), &m, Size) == 10);
+
+        Call(HashMap(i32, f64), &m, ShrinkToFit);
+        bool ok = true;
+        for (i32 i = 0; i < 10; i++)
+        {
+            f64* v = Call(HashMap(i32, f64), &m, At, i);
+            if (!v || *v != (f64)i)
+            {
+                ok = false; break;
+            }
+        }
+        TEST_ASSERT(r, ok);
+
+        Call(HashMap(i32, f64), &m, Insert, 999, 999.0);
+        f64* v = Call(HashMap(i32, f64), &m, At, 999);
+        TEST_ASSERT(r, v && *v == 999.0);
+        m.vptr->destroy(&m);
+    }
+
+    TEST_GROUP(r, "ShrinkToFit empty / single");
+    {
+        HashMap(i32, f64) m;
+        Create(HashMap(i32, f64), &m);
+        Call(HashMap(i32, f64), &m, ShrinkToFit);
+        TEST_ASSERT(r, Call(HashMap(i32, f64), &m, Size) == 0);
+        m.vptr->destroy(&m);
+    }
+    {
+        HashMap(i32, f64) m;
+        Create(HashMap(i32, f64), &m);
+        Call(HashMap(i32, f64), &m, Insert, 1, 1.0);
+        Call(HashMap(i32, f64), &m, Erase, 1);
+        Call(HashMap(i32, f64), &m, ShrinkToFit);
+        TEST_ASSERT(r, Call(HashMap(i32, f64), &m, Size) == 0);
+        m.vptr->destroy(&m);
+    }
+
+    TEST_GROUP(r, "Empty iterator");
+    {
+        HashMap(i32, f64) m;
+        Create(HashMap(i32, f64), &m);
+        HashMapIter(i32, f64) it = VCall(HashMap(i32, f64), &m, begin);
+        HashMapIter(i32, f64) end = VCall(HashMap(i32, f64), &m, end);
+        TEST_ASSERT(r, VCall(HashMapIter(i32, f64), &it, equals, &end));
+        m.vptr->destroy(&m);
+    }
+
+    TEST_GROUP(r, "Single element iterator");
+    {
+        HashMap(i32, f64) m;
+        Create(HashMap(i32, f64), &m);
+        Call(HashMap(i32, f64), &m, Insert, 7, 7.7);
+        HashMapIter(i32, f64) it = VCall(HashMap(i32, f64), &m, begin);
+        HashMapIter(i32, f64) end = VCall(HashMap(i32, f64), &m, end);
+        TEST_ASSERT(r, !VCall(HashMapIter(i32, f64), &it, equals, &end));
+        f64 val = *VCall(HashMapIter(i32, f64), &it, get).value;
+        TEST_ASSERT(r, val == 7.7);
+        VCall(HashMapIter(i32, f64), &it, next);
+        TEST_ASSERT(r, VCall(HashMapIter(i32, f64), &it, equals, &end));
+        m.vptr->destroy(&m);
+    }
+
+    TEST_GROUP(r, "IsEmpty lifecycle");
+    {
+        HashMap(i32, f64) m;
+        Create(HashMap(i32, f64), &m);
+        TEST_ASSERT(r, Call(HashMap(i32, f64), &m, IsEmpty));
+        Call(HashMap(i32, f64), &m, Insert, 1, 1.0);
+        TEST_ASSERT(r, !Call(HashMap(i32, f64), &m, IsEmpty));
+        Call(HashMap(i32, f64), &m, Clear);
+        TEST_ASSERT(r, Call(HashMap(i32, f64), &m, IsEmpty));
+        m.vptr->destroy(&m);
+    }
+
+    TEST_GROUP(r, "LoadFactor");
+    {
+        HashMap(i32, f64) m;
+        Create(HashMap(i32, f64), &m);
+        TEST_ASSERT(r, Call(HashMap(i32, f64), &m, LoadFactor) == 0.0);
+        Call(HashMap(i32, f64), &m, Insert, 1, 1.0);
+        Call(HashMap(i32, f64), &m, Insert, 2, 2.0);
+        Call(HashMap(i32, f64), &m, Insert, 3, 3.0);
+        double lf = Call(HashMap(i32, f64), &m, LoadFactor);
+        TEST_ASSERT(r, lf > 0.0 && lf <= 0.75);
+        m.vptr->destroy(&m);
+    }
+
+    TEST_GROUP(r, "Swap");
+    {
+        HashMap(i32, f64) a, b;
+        Create(HashMap(i32, f64), &a);
+        Create(HashMap(i32, f64), &b);
+        Call(HashMap(i32, f64), &a, Insert, 1, 100.0);
+        Call(HashMap(i32, f64), &a, Insert, 2, 200.0);
+        Call(HashMap(i32, f64), &b, Insert, 3, 300.0);
+        Call(HashMap(i32, f64), &a, Swap, &b);
+        TEST_ASSERT(r, Call(HashMap(i32, f64), &a, At, 3) != NULL);
+        TEST_ASSERT(r, Call(HashMap(i32, f64), &b, At, 1) != NULL);
+        f64* v = Call(HashMap(i32, f64), &a, At, 3);
+        TEST_ASSERT(r, v && *v == 300.0);
+        v = Call(HashMap(i32, f64), &b, At, 2);
+        TEST_ASSERT(r, v && *v == 200.0);
+        TEST_ASSERT(r, Call(HashMap(i32, f64), &a, Size) == 1);
+        TEST_ASSERT(r, Call(HashMap(i32, f64), &b, Size) == 2);
+        a.vptr->destroy(&a);
+        b.vptr->destroy(&b);
+    }
+}
+
+void hashmap_test(void)
+{
+    TEST_INIT(runner, "HashMap Tests");
+    TEST_BEGIN(&runner);
+
+    #ifdef HASHMAP_TEST_POD
+    hashmap_test_pod(&runner);
+    #endif
+    #ifdef HASHMAP_TEST_STRING
+    hashmap_test_string(&runner);
+    #endif
+    #ifdef HASHMAP_TEST_EDGE
+    hashmap_test_edge(&runner);
+    #endif
+
+    TEST_END(&runner);
 }
 
 #endif
@@ -547,6 +1115,9 @@ void test(void)
     #endif
     #ifdef VECTOR_TEST
     vector_test();
+    #endif
+    #ifdef HASHMAP_TEST
+    hashmap_test();
     #endif
 }
 

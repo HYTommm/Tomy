@@ -141,11 +141,13 @@
   <ItemGroup>
     <ClInclude Include="include\class\class_macro.h" />
     <ClInclude Include="include\data_type\data_type.h" />
+    <ClInclude Include="include\data_type\hashmap.h" />
     <ClInclude Include="include\data_type\vector.h" />
     <ClInclude Include="include\error.h" />
     <ClInclude Include="include\macro.h" />
     <ClInclude Include="include\class\object_class.h" />
     <ClInclude Include="include\print.h" />
+    <ClInclude Include="include\test.h" />
     <ClInclude Include="include\tomy.h" />
     <ClInclude Include="include\ustring.h" />
   </ItemGroup>

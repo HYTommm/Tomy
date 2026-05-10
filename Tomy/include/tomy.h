@@ -12,5 +12,6 @@
 #include "class/object_class.h"
 
 #include "data_type/vector.h"
+#include "data_type/hashmap.h"
 #include "print.h"
 #include "error.h"
