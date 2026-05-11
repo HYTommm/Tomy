@@ -13,5 +13,7 @@
 
 #include "data_type/vector.h"
 #include "data_type/hashmap.h"
+#include "data_type/list.h"
+#include "data_type/doublylist.h"
 #include "print.h"
 #include "error.h"
