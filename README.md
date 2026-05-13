@@ -424,7 +424,7 @@ while (!VCall(VecIter(f32), &it, equals, &end)) {
 | 算法（SORT / SORT_CMP） | **HYTomZ 自写** | IntroSort + 归并排序 |
 | 打印系统（print.h） | **emin** | 类型泛化打印、{} 格式化、ANSI 颜色 |
 | 动态字符串（ustring.h/.c） | **emin** | 自动扩容 String 类型 |
-| 错误处理（error.h） | 基于 emin + 自写 | 错误检查宏体系 |
+| 错误处理（error.h） | 灵感基于 godot + 自写 | 错误检查宏体系 |
 
 ---
 
