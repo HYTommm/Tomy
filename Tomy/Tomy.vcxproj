@@ -139,9 +139,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\algorithm.h" />
     <ClInclude Include="include\class\class_macro.h" />
     <ClInclude Include="include\data_type\data_type.h" />
     <ClInclude Include="include\data_type\doublylist.h" />
+    <ClInclude Include="include\data_type\pool_list.h" />
+    <ClInclude Include="include\data_type\pool_doublylist.h" />
     <ClInclude Include="include\data_type\hashmap.h" />
     <ClInclude Include="include\data_type\list.h" />
     <ClInclude Include="include\data_type\vector.h" />
@@ -150,12 +153,22 @@
     <ClInclude Include="include\class\object_class.h" />
     <ClInclude Include="include\print.h" />
     <ClInclude Include="include\test.h" />
+    <ClInclude Include="include\test_config.h" />
     <ClInclude Include="include\tomy.h" />
     <ClInclude Include="include\ustring.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\main.c" />
+    <ClCompile Include="examples\oop_example.c" />
+    <ClCompile Include="src\benchmark.c" />
     <ClCompile Include="src\object.c" />
+    <ClCompile Include="src\test_algorithm.c" />
+    <ClCompile Include="src\test_dlist.c" />
+    <ClCompile Include="src\test_hashmap.c" />
+    <ClCompile Include="src\test_list.c" />
+    <ClCompile Include="src\test_print.c" />
+    <ClCompile Include="src\test_pool_list.c" />
+    <ClCompile Include="src\test_pool_dlist.c" />
+    <ClCompile Include="src\test_vector.c" />
     <ClCompile Include="src\ustring.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -11,9 +11,13 @@
 
 #include "class/object_class.h"
 
+#include "algorithm.h"
+
 #include "data_type/vector.h"
 #include "data_type/hashmap.h"
 #include "data_type/list.h"
 #include "data_type/doublylist.h"
+#include "data_type/pool_list.h"
+#include "data_type/pool_doublylist.h"
 #include "print.h"
 #include "error.h"

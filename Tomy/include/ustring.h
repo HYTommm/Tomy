@@ -1,4 +1,12 @@
-﻿#pragma once
+﻿/*
+ * ustring.h — 动态字符串 (String)
+ *
+ * 基于 emincin/code (https://github.com/emincin/code/blob/main/c/print/main.c)
+ * 的原始 String 实现改造和扩展，MIT License。
+ * 原始代码 Copyright (c) 2025 emincin.
+ */
+
+#pragma once
 
 #include <stdint.h>
 #include "data_type/data_type.h"

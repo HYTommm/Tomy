@@ -45,12 +45,66 @@
     <ClInclude Include="include\data_type\vector.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="include\algorithm.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data_type\doublylist.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data_type\pool_list.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data_type\pool_doublylist.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data_type\hashmap.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data_type\list.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\test.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\test_config.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\main.c">
+    <ClCompile Include="src\benchmark.c">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\ustring.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\object.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\test_algorithm.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\test_dlist.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\test_hashmap.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\test_list.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\test_print.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\test_pool_list.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\test_pool_dlist.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\test_vector.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="examples\oop_example.c">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

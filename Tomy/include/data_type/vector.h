@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <string.h>
 
+#include "algorithm.h"
 #include "data_type.h"
 #include "print.h"
 #include "ustring.h"
@@ -35,11 +36,12 @@ CLASS{
     ElemConstructor* construct;
     ElemDestructor* destroy;
     ElemCopy* copy;
+    CmpFunc cmp;
 } _VectorBase;
 
-void _VectorBase_Create(_VectorBase* self, umax elem_size, ElemConstructor* construct, ElemDestructor* destroy, ElemCopy* copy);
+void _VectorBase_Create(_VectorBase* self, umax elem_size, ElemConstructor* construct, ElemDestructor* destroy, ElemCopy* copy, CmpFunc cmp);
 void _VectorBase_Destroy(_VectorBase* self);
-_VectorBase* _VectorBase_New(umax elem_size, ElemConstructor* construct, ElemDestructor* destroy, ElemCopy* copy);
+_VectorBase* _VectorBase_New(umax elem_size, ElemConstructor* construct, ElemDestructor* destroy, ElemCopy* copy, CmpFunc cmp);
 void _VectorBase_Delete(_VectorBase* self);
 
 bool _VectorBase_IsEmpty(const _VectorBase* self);
@@ -61,7 +63,7 @@ void _VectorBase_SwapErase(_VectorBase* self, umax index);
 void _VectorBase_ShrinkToFit(_VectorBase* self);
 void _VectorBase_Swap(_VectorBase* self, _VectorBase* other);
 
-inline void _VectorBase_Create(_VectorBase* self, const umax elem_size, ElemConstructor* const construct, ElemDestructor* destroy, ElemCopy* const copy)
+inline void _VectorBase_Create(_VectorBase* self, const umax elem_size, ElemConstructor* const construct, ElemDestructor* destroy, ElemCopy* const copy, const CmpFunc cmp)
 {
     ERR_RET_NULL(self);
     Object_Create((Object*)self);
@@ -72,6 +74,7 @@ inline void _VectorBase_Create(_VectorBase* self, const umax elem_size, ElemCons
     self->construct = construct;
     self->destroy = destroy;
     self->copy = copy;
+    self->cmp = cmp;
 }
 
 inline void _VectorBase_Destroy(_VectorBase* self)
@@ -92,11 +95,11 @@ inline void _VectorBase_Destroy(_VectorBase* self)
     self->elem_size = 0;
 }
 
-inline _VectorBase* _VectorBase_New(const umax elem_size, ElemConstructor* const construct, ElemDestructor* const destroy, ElemCopy* const copy)
+inline _VectorBase* _VectorBase_New(const umax elem_size, ElemConstructor* const construct, ElemDestructor* const destroy, ElemCopy* const copy, const CmpFunc cmp)
 {
     _VectorBase* self = (_VectorBase*)malloc(sizeof(_VectorBase));
     ERR_RET_V_NULL(self, NULL);
-    _VectorBase_Create(self, elem_size, construct, destroy, copy);
+    _VectorBase_Create(self, elem_size, construct, destroy, copy, cmp);
     return self;
 }
 
@@ -512,7 +515,7 @@ inline void _VectorBase_Swap(_VectorBase* self, _VectorBase* other)
     *other = tmp;
 }
 
-#define _VECTOR_IMPL_EX1(T, CONSTRUCT, DESTROY, COPY)                                       \
+#define _VECTOR_IMPL_EX1(T, CONSTRUCT, DESTROY, COPY, CMP)                                       \
                                                                                             \
     VTABLE{                                                                                 \
         FROM(_Iterator_VTable);                                                             \
@@ -662,11 +665,11 @@ inline void _Vector_##T##_Create(Vector_##T* self) {                            
         .emplace_back = _Vector_##T##_EmplaceBack,                                         \
         .swap_erase    = _Vector_##T##_SwapErase,                                          \
     };                                                                                      \
-    _VectorBase_Create((_VectorBase*)self, sizeof(T), CONSTRUCT, DESTROY, COPY);            \
+    _VectorBase_Create((_VectorBase*)self, sizeof(T), CONSTRUCT, DESTROY, COPY, CMP);            \
     self->vptr = (void*)&_Vector_##T##_VTable_Instance;                                     \
 }                                                                                           \
 inline Vector_##T* _Vector_##T##_New() {                                                    \
-    return (Vector_##T*)_VectorBase_New(sizeof(T), CONSTRUCT, DESTROY, COPY);               \
+    return (Vector_##T*)_VectorBase_New(sizeof(T), CONSTRUCT, DESTROY, COPY, CMP);               \
 }                                                                                           \
 inline String* _Vector_##T##_ToString(Vector_##T* self) {                                   \
     String* str = New(String, STRING_CAPACITY);                                              \
@@ -764,7 +767,7 @@ inline T* _Vector_##T##_EmplaceBack(Vector_##T* self) {                         
     self->front = (T*)_VectorBase_Front((_VectorBase*)self);                                  \
     self->back = (T*)_VectorBase_Back((_VectorBase*)self);                                    \
     return ptr;                                                                               \
-}                                                                                           \
+}                                                                                            \
 inline void _Vector_##T##_SwapErase(Vector_##T* self, const umax index) {                    \
     _VectorBase_SwapErase((_VectorBase*)self, index);                                        \
     if (self->size == 0) {                                                                   \
@@ -774,13 +777,21 @@ inline void _Vector_##T##_SwapErase(Vector_##T* self, const umax index) {       
         self->front = (T*)_VectorBase_Front((_VectorBase*)self);                             \
         self->back = (T*)_VectorBase_Back((_VectorBase*)self);                               \
     }                                                                                        \
-}                                                                                           \
+}                                                                                            \
+static inline void _Vector_##T##_Sort(Vector_##T* self, int (*cmp)(const T*, const T*)) {    \
+    ERR_RET_NULL(self);                                                                      \
+    if (self->size <= 1) return;                                                             \
+    if (!cmp) cmp = (int (*)(const T*, const T*))self->cmp;                                  \
+    qsort(self->data, self->size, sizeof(T), (int (*)(const void*, const void*))cmp);        \
+}                                                                                            \
 
-#define _VECTOR_IMPL_EX2(T, CONSTRUCT, DESTROY, COPY) _VECTOR_IMPL_EX1(T, CONSTRUCT, DESTROY, COPY)
-#define _VECTOR_IMPL_EX3(T, CONSTRUCT, DESTROY, COPY) _VECTOR_IMPL_EX2(T, CONSTRUCT, DESTROY, COPY)
-#define VECTOR_IMPL_EX(T, CONSTRUCT, DESTROY, COPY) _VECTOR_IMPL_EX3(T, CONSTRUCT, DESTROY, COPY)
+#define _VECTOR_IMPL_EX2(T, CONSTRUCT, DESTROY, COPY, CMP) _VECTOR_IMPL_EX1(T, CONSTRUCT, DESTROY, COPY, CMP)
+#define _VECTOR_IMPL_EX3(T, CONSTRUCT, DESTROY, COPY, CMP) _VECTOR_IMPL_EX2(T, CONSTRUCT, DESTROY, COPY, CMP)
+#define VECTOR_IMPL_EX(T, CONSTRUCT, DESTROY, COPY, CMP) _VECTOR_IMPL_EX3(T, CONSTRUCT, DESTROY, COPY, CMP)
 
-#define VECTOR_IMPL(T) VECTOR_IMPL_EX(T, NULL, NULL, NULL)
+#define VECTOR_IMPL(T) VECTOR_IMPL_EX(T, NULL, NULL, NULL, NULL)
+//内置类型默认比较函数命名规则： _T_cmp_default
+#define VECTOR_IMPL_DEFAULT_CMP(T) VECTOR_IMPL_EX(T, NULL, NULL, NULL, _##T##_cmp_default)
 
 #define _VectorIterator(T) Vector_##T##_Iterator
 #define VectorIterator(T) _VectorIterator(T)
@@ -790,23 +801,23 @@ inline void _Vector_##T##_SwapErase(Vector_##T* self, const umax index) {       
 #define Vector(T) _Vector(T)
 #define Vec Vector
 
-VECTOR_IMPL(i8);
-VECTOR_IMPL(i16);
-VECTOR_IMPL(i32);
-VECTOR_IMPL(i64);
-VECTOR_IMPL(imax);
-VECTOR_IMPL(u8);
-VECTOR_IMPL(byte);
-VECTOR_IMPL(u16);
-VECTOR_IMPL(u32);
-VECTOR_IMPL(u64);
-VECTOR_IMPL(umax);
-VECTOR_IMPL(f32);
-VECTOR_IMPL(f64);
+VECTOR_IMPL_DEFAULT_CMP(i8);
+VECTOR_IMPL_DEFAULT_CMP(i16);
+VECTOR_IMPL_DEFAULT_CMP(i32);
+VECTOR_IMPL_DEFAULT_CMP(i64);
+VECTOR_IMPL_DEFAULT_CMP(imax);
+VECTOR_IMPL_DEFAULT_CMP(u8);
+VECTOR_IMPL_DEFAULT_CMP(byte);
+VECTOR_IMPL_DEFAULT_CMP(u16);
+VECTOR_IMPL_DEFAULT_CMP(u32);
+VECTOR_IMPL_DEFAULT_CMP(u64);
+VECTOR_IMPL_DEFAULT_CMP(umax);
+VECTOR_IMPL_DEFAULT_CMP(f32);
+VECTOR_IMPL_DEFAULT_CMP(f64);
 
-VECTOR_IMPL(Object);
+VECTOR_IMPL_DEFAULT_CMP(Object);
 
-VECTOR_IMPL_EX(String, _String_Create, _String_Destroy, _String_Copy);
+VECTOR_IMPL_EX(String, _String_Create, _String_Destroy, _String_Copy, _String_cmp_default);
 
 //#define VECTOR_X(T, T_CONSTRUCT, T_DESTROY, T_COPY)
 

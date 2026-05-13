@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <string.h>
 
 #include "data_type.h"
@@ -8,10 +8,19 @@
 
 /* ============ Node Type ============ */
 
-typedef struct _ListNode { struct _ListNode* next; } _ListNode;
+typedef struct _ListNode
+{
+    struct _ListNode* next;
+} _ListNode;
 
-static inline void* _List_Data(_ListNode* node) { return (byte*)node + sizeof(_ListNode); }
-static inline _ListNode* _List_NewNode(umax elem_size) { return (_ListNode*)malloc(sizeof(_ListNode) + elem_size); }
+static inline void* _List_Data(_ListNode* node)
+{
+    return (byte*)node + sizeof(_ListNode);
+}
+static inline _ListNode* _List_NewNode(umax elem_size)
+{
+    return (_ListNode*)malloc(sizeof(_ListNode) + elem_size);
+}
 
 /* ============ _ListBase ============ */
 
@@ -26,13 +35,14 @@ CLASS{
     ElemConstructor* construct;
     ElemDestructor* destroy;
     ElemCopy* copy;
+    CmpFunc cmp;
 } _ListBase;
 
 /* ============ _ListBase Implementation ============ */
 
 inline void _ListBase_Create(_ListBase* self,
     umax elem_size,
-    ElemConstructor* construct, ElemDestructor* destroy, ElemCopy* copy)
+    ElemConstructor* construct, ElemDestructor* destroy, ElemCopy* copy, CmpFunc cmp)
 {
     ERR_RET_NULL(self);
     Object_Create((Object*)self);
@@ -43,6 +53,7 @@ inline void _ListBase_Create(_ListBase* self,
     self->construct = construct;
     self->destroy = destroy;
     self->copy = copy;
+    self->cmp = cmp;
 }
 
 inline void _ListBase_Destroy(_ListBase* self)
@@ -62,11 +73,11 @@ inline void _ListBase_Destroy(_ListBase* self)
 }
 
 inline _ListBase* _ListBase_New(umax elem_size,
-    ElemConstructor* construct, ElemDestructor* destroy, ElemCopy* copy)
+    ElemConstructor* construct, ElemDestructor* destroy, ElemCopy* copy, CmpFunc cmp)
 {
     _ListBase* self = (_ListBase*)malloc(sizeof(_ListBase));
     ERR_RET_V_NULL(self, NULL);
-    _ListBase_Create(self, elem_size, construct, destroy, copy);
+    _ListBase_Create(self, elem_size, construct, destroy, copy, cmp);
     return self;
 }
 
@@ -224,7 +235,7 @@ inline void _ListBase_Reverse(_ListBase* self)
 
 /* ============ X-Macro: Typed List Generation ============ */
 
-#define _LIST_IMPL_EX1(T, CONSTRUCT, DESTROY, COPY)                                            \
+#define _LIST_IMPL_EX1(T, CONSTRUCT, DESTROY, COPY, CMP)                                            \
                                                                                                 \
     /* ---- Iterator VTABLE + CLASS ---- */                                                     \
     VTABLE{                                                                                     \
@@ -385,7 +396,7 @@ inline void _ListBase_Reverse(_ListBase* self)
             .size         = _List_##T##_Size,                                                   \
             .reverse      = _List_##T##_Reverse,                                                \
         };                                                                                      \
-        _ListBase_Create((_ListBase*)self, sizeof(T), CONSTRUCT, DESTROY, COPY);                \
+        _ListBase_Create((_ListBase*)self, sizeof(T), CONSTRUCT, DESTROY, COPY, CMP);                \
         self->vptr = (void*)&vt;                                                                \
     }                                                                                           \
                                                                                                 \
@@ -496,14 +507,53 @@ inline void _ListBase_Reverse(_ListBase* self)
         _List_##T##_Iterator##_Create(&it);                                                     \
         it.node = &((_ListBase*)self)->head;                                                    \
         return it;                                                                              \
-    }
+    }                                                                                           \
+    inline _ListNode* _List_##T##_Merge(_ListNode* a, _ListNode* b, int (*cmp)(const T*, const T*)) {   \
+        _ListNode dummy = { NULL };                                                                    \
+        _ListNode* tail = &dummy;                                                                      \
+        while (a && b) {                                                                               \
+            if (cmp((const T*)_List_Data(a), (const T*)_List_Data(b)) < 0) {                           \
+                tail->next = a; a = a->next;                                                           \
+            } else {                                                                                   \
+                tail->next = b; b = b->next;                                                           \
+            }                                                                                          \
+            tail = tail->next;                                                                         \
+        }                                                                                              \
+        tail->next = a ? a : b;                                                                        \
+        return dummy.next;                                                                             \
+    }                                                                                                  \
+    inline _ListNode* _List_##T##_MergeSort(_ListNode* head, int (*cmp)(const T*, const T*)) {         \
+        if (!head || !head->next) return head;                                                         \
+        _ListNode* slow = head;                                                                        \
+        _ListNode* fast = head->next;                                                                  \
+        while (fast && fast->next) {                                                                   \
+            slow = slow->next;                                                                         \
+            fast = fast->next->next;                                                                   \
+        }                                                                                              \
+        _ListNode* mid = slow->next;                                                                   \
+        slow->next = NULL;                                                                             \
+        _ListNode* left = _List_##T##_MergeSort(head, cmp);                                            \
+        _ListNode* right = _List_##T##_MergeSort(mid, cmp);                                            \
+        return _List_##T##_Merge(left, right, cmp);                                                    \
+    }                                                                                                  \
+    inline void _List_##T##_Sort(List_##T* self, int (*cmp)(const T*, const T*)) {                     \
+        ERR_RET_NULL(self);                                                                            \
+        if (self->size <= 1) return;                                                                   \
+        if (!cmp) cmp = (int (*)(const T*, const T*))self->cmp;                                        \
+        _ListNode* new_head = _List_##T##_MergeSort(self->head.next, cmp);                             \
+        self->head.next = new_head;                                                                    \
+        /* 更新 tail 指针：走到最后一个节点 */                                                         \
+        _ListNode* cur = new_head;                                                                     \
+        while (cur && cur->next) cur = cur->next;                                                      \
+        self->tail = cur ? cur : &self->head;                                                          \
+    }                                                                                                  \
 
-#define _LIST_IMPL_EX2(T, CONSTRUCT, DESTROY, COPY)  _LIST_IMPL_EX1(T, CONSTRUCT, DESTROY, COPY)
-#define _LIST_IMPL_EX3(T, CONSTRUCT, DESTROY, COPY)  _LIST_IMPL_EX2(T, CONSTRUCT, DESTROY, COPY)
-#define LIST_IMPL_EX(T, CONSTRUCT, DESTROY, COPY)    _LIST_IMPL_EX3(T, CONSTRUCT, DESTROY, COPY)
+#define _LIST_IMPL_EX2(T, CONSTRUCT, DESTROY, COPY, CMP)  _LIST_IMPL_EX1(T, CONSTRUCT, DESTROY, COPY, CMP)
+#define _LIST_IMPL_EX3(T, CONSTRUCT, DESTROY, COPY, CMP)  _LIST_IMPL_EX2(T, CONSTRUCT, DESTROY, COPY, CMP)
+#define LIST_IMPL_EX(T, CONSTRUCT, DESTROY, COPY, CMP)    _LIST_IMPL_EX3(T, CONSTRUCT, DESTROY, COPY, CMP)
 
 /* For POD types: NULL callbacks → memcpy-based */
-#define LIST_IMPL(T)  LIST_IMPL_EX(T, NULL, NULL, NULL)
+#define LIST_IMPL(T)  LIST_IMPL_EX(T, NULL, NULL, NULL, _##T##_cmp_default)
 
 /* ============ Type Shortcut Macros ============ */
 
@@ -528,4 +578,4 @@ LIST_IMPL(f32);
 LIST_IMPL(f64);
 LIST_IMPL(Object);
 
-LIST_IMPL_EX(String, _String_Create, _String_Destroy, _String_Copy);
+LIST_IMPL_EX(String, _String_Create, _String_Destroy, _String_Copy, _String_cmp_default);

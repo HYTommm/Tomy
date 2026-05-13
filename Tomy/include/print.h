@@ -1,4 +1,12 @@
-﻿#pragma once
+﻿/*
+ * print.h — 泛型打印系统
+ *
+ * 基于 emincin/code (https://github.com/emincin/code/blob/main/c/print/main.c)
+ * 的原始实现改造和扩展，MIT License。
+ * 原始代码 Copyright (c) 2025 emincin.
+ */
+
+#pragma once
 
 #include <stdarg.h>
 //#include <stdbool.h>
@@ -147,7 +155,7 @@ enum
 
 #define SELECT_2(_1, _2, ...) _2
 
-#define print_emin(...) SELECT_2(__VA_OPT__(,) \
+#define print(...) SELECT_2(__VA_OPT__(,) \
   print_func( \
     as_print_config_ptr(LAST(__VA_ARGS__)), \
     COUNT_ARGS(__VA_ARGS__), \
@@ -155,7 +163,7 @@ enum
   ), \
   print_func(NULL, ARGS_COUNT(__VA_ARGS__)))
 
-#define println_emin(...) SELECT_2(__VA_OPT__(,) \
+#define println(...) SELECT_2(__VA_OPT__(,) \
   println_func( \
     as_print_config_ptr(LAST(__VA_ARGS__)), \
     COUNT_ARGS(__VA_ARGS__), \
@@ -308,10 +316,6 @@ inline size_t read_from_va_list(String* str, const int type, va_list* args_ptr)
                 return 1;
             }
             [[maybe_unused]] bool ok = Call(String, str, AppendN, arg->data, len);
-            if (type == TYPE_STRING_PTR)
-            {
-                Call(String, arg, Delete);
-            }
             return len;
         }
         case TYPE_COLOR24:

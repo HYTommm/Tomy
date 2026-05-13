@@ -54,13 +54,13 @@ typedef struct
     TestRunner runner = { name, 0, 0, 0 }
 
 #define TEST_BEGIN(runner) \
-    println_emin(set_fg_idx(COLOR_BRIGHT_CYAN), \
+    println(set_fg_idx(COLOR_BRIGHT_CYAN), \
         "=== ", (runner)->suite_name, " ===", reset_style())
 
 #define TEST_END(runner) \
     do { \
-        println_emin(); \
-        println_emin( \
+        println(); \
+        println( \
             set_fg_idx(COLOR_BRIGHT_GREEN), "PASS  ", (runner)->passed, \
             set_fg_idx(COLOR_BRIGHT_RED),   "FAIL  ", (runner)->failed, \
             reset_style(),                   "Total ", (runner)->total); \
@@ -76,15 +76,15 @@ typedef struct
 #define _TEST_PASS(runner, file, line) \
     do { \
         (runner)->passed++; \
-        print_emin(file ":" _TEST_STR(line), set(sep = "", end = "")); \
-        println_emin(set_fg_idx(COLOR_BRIGHT_GREEN), "  PASS", reset_style()); \
+        print(file ":" _TEST_STR(line), set(sep = "", end = "")); \
+        println(set_fg_idx(COLOR_BRIGHT_GREEN), "  PASS", reset_style()); \
     } while(0)
 
 #define _TEST_FAIL(runner, file, line, ...) \
     do { \
         (runner)->failed++; \
-        print_emin(file ":" _TEST_STR(line), set(sep = "", end = "")); \
-        println_emin(set_fg_idx(COLOR_BRIGHT_RED), "  FAIL", reset_style(), \
+        print(file ":" _TEST_STR(line), set(sep = "", end = "")); \
+        println(set_fg_idx(COLOR_BRIGHT_RED), "  FAIL", reset_style(), \
             __VA_ARGS__); \
     } while(0)
 

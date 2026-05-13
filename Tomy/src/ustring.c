@@ -1,4 +1,12 @@
-﻿#include "ustring.h"
+﻿/*
+ * ustring.c — 动态字符串 (String) 实现
+ *
+ * 基于 emincin/code (https://github.com/emincin/code/blob/main/c/print/main.c)
+ * 的原始 String 实现改造和扩展，MIT License。
+ * 原始代码 Copyright (c) 2025 emincin.
+ */
+
+#include "ustring.h"
 
 #include <assert.h>
 #include <string.h>
