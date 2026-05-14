@@ -378,6 +378,7 @@ INLINE int format_from_va_list(String* str, const char* fmt, const int count, va
     return arg_index;
 }
 
+
 INLINE void parse_va_list(String* str, const char* sep, int count, va_list args)
 {
     va_list args_copy;
@@ -391,7 +392,7 @@ INLINE void parse_va_list(String* str, const char* sep, int count, va_list args)
             char* fmt = va_arg(args_copy, char*);
             int ret = format_from_va_list(str, fmt, count - 1, &args_copy);
             i += ret;
-        }
+	}
         else
         {
             size_t ret = read_from_va_list(str, type, &args_copy);

@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <stdlib.h>
 
-#include "error.h"
+#include "../error.h"
 #include "class_macro.h"
 
 CLASS String String;
