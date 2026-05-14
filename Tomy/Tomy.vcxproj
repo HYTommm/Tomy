@@ -158,8 +158,8 @@
     <ClInclude Include="include\ustring.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="examples\oop_example.c" />
     <ClCompile Include="src\benchmark.c" />
+    <ClCompile Include="src\main.c" />
     <ClCompile Include="src\object.c" />
     <ClCompile Include="src\test_algorithm.c" />
     <ClCompile Include="src\test_dlist.c" />

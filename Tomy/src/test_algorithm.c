@@ -675,6 +675,386 @@ static void _test_dlist_sort_string(TestRunner* r)
 }
 
 // ============================================================
+// Vector Find Tests (POD)
+// ============================================================
+
+static void _test_find_pred_i32(const i32* x) { return *x % 2 == 0; }
+
+static void _test_vector_find_pod(TestRunner* r)
+{
+    TEST_GROUP(r, "Vec(i32) Find existing");
+    {
+        Vec(i32) v;
+        Create(Vec(i32), &v);
+        int data[] = { 10, 20, 30, 40, 50 };
+        for (int i = 0; i < 5; i++) FT(Vec(i32), &v)->push_back(&v, data[i]);
+
+        i32 val = 30;
+        i32* found = _Vector_i32_Find(&v, val);
+        TEST_ASSERT_NOT_NULL(r, found);
+        TEST_ASSERT(r, found && *found == 30);
+        v.vptr->destroy(&v);
+    }
+
+    TEST_GROUP(r, "Vec(i32) Find not found");
+    {
+        Vec(i32) v;
+        Create(Vec(i32), &v);
+        for (i32 i = 0; i < 5; i++) FT(Vec(i32), &v)->push_back(&v, i);
+        i32 val = 99;
+        i32* found = _Vector_i32_Find(&v, val);
+        TEST_ASSERT_NULL(r, found);
+        v.vptr->destroy(&v);
+    }
+
+    TEST_GROUP(r, "Vec(i32) Find first/last");
+    {
+        Vec(i32) v;
+        Create(Vec(i32), &v);
+        for (i32 i = 0; i < 5; i++) FT(Vec(i32), &v)->push_back(&v, i);
+
+        i32 first = 0;
+        i32* f = _Vector_i32_Find(&v, first);
+        TEST_ASSERT(r, f && *f == 0 && f == v.data);
+
+        i32 last = 4;
+        i32* l = _Vector_i32_Find(&v, last);
+        TEST_ASSERT(r, l && *l == 4);
+        v.vptr->destroy(&v);
+    }
+
+    TEST_GROUP(r, "Vec(i32) Find empty");
+    {
+        Vec(i32) v;
+        Create(Vec(i32), &v);
+        i32 val = 0;
+        i32* found = _Vector_i32_Find(&v, val);
+        TEST_ASSERT_NULL(r, found);
+        v.vptr->destroy(&v);
+    }
+
+    TEST_GROUP(r, "Vec(i32) FindIf");
+    {
+        Vec(i32) v;
+        Create(Vec(i32), &v);
+        for (i32 i = 1; i <= 5; i++) FT(Vec(i32), &v)->push_back(&v, i);
+        i32* found = _Vector_i32_FindIf(&v, _test_find_pred_i32);
+        TEST_ASSERT_NOT_NULL(r, found);
+        TEST_ASSERT(r, found && *found == 2);
+        v.vptr->destroy(&v);
+    }
+
+    TEST_GROUP(r, "Vec(i32) Count");
+    {
+        Vec(i32) v;
+        Create(Vec(i32), &v);
+        int data[] = { 1, 2, 2, 3, 2, 4 };
+        for (int i = 0; i < 6; i++) FT(Vec(i32), &v)->push_back(&v, data[i]);
+        i32 val = 2;
+        umax cnt = _Vector_i32_Count(&v, val);
+        TEST_ASSERT(r, cnt == 3);
+        val = 5;
+        cnt = _Vector_i32_Count(&v, val);
+        TEST_ASSERT(r, cnt == 0);
+        v.vptr->destroy(&v);
+    }
+
+    TEST_GROUP(r, "Vec(i32) Reverse");
+    {
+        Vec(i32) v;
+        Create(Vec(i32), &v);
+        for (i32 i = 1; i <= 5; i++) FT(Vec(i32), &v)->push_back(&v, i);
+        _Vector_i32_Reverse(&v);
+        TEST_ASSERT(r, *FT(Vec(i32), &v)->at(&v, 0) == 5);
+        TEST_ASSERT(r, *FT(Vec(i32), &v)->at(&v, 2) == 3);
+        TEST_ASSERT(r, *FT(Vec(i32), &v)->at(&v, 4) == 1);
+        v.vptr->destroy(&v);
+    }
+
+    TEST_GROUP(r, "Vec(i32) Reverse single/empty");
+    {
+        Vec(i32) v;
+        Create(Vec(i32), &v);
+        _Vector_i32_Reverse(&v);  // empty: no crash
+        FT(Vec(i32), &v)->push_back(&v, 42);
+        _Vector_i32_Reverse(&v);  // single: no crash
+        TEST_ASSERT(r, *FT(Vec(i32), &v)->at(&v, 0) == 42);
+        v.vptr->destroy(&v);
+    }
+
+    TEST_GROUP(r, "Vec(f64) BinarySearch");
+    {
+        Vec(f64) v;
+        Create(Vec(f64), &v);
+        f64 data[] = { 1.0, 2.0, 3.0, 4.0, 5.0 };
+        for (int i = 0; i < 5; i++) FT(Vec(f64), &v)->push_back(&v, data[i]);
+
+        f64 val = 3.0;
+        f64* found = _Vector_f64_BinarySearch(&v, val);
+        TEST_ASSERT_NOT_NULL(r, found);
+        TEST_ASSERT(r, found && *found == 3.0);
+        v.vptr->destroy(&v);
+    }
+
+    TEST_GROUP(r, "Vec(f64) BinarySearch not found");
+    {
+        Vec(f64) v;
+        Create(Vec(f64), &v);
+        f64 data[] = { 1.0, 2.0, 3.0, 4.0, 5.0 };
+        for (int i = 0; i < 5; i++) FT(Vec(f64), &v)->push_back(&v, data[i]);
+
+        f64 val = 6.0;
+        f64* found = _Vector_f64_BinarySearch(&v, val);
+        TEST_ASSERT_NULL(r, found);
+        v.vptr->destroy(&v);
+    }
+
+    TEST_GROUP(r, "Vec(i32) BinarySearch empty");
+    {
+        Vec(i32) v;
+        Create(Vec(i32), &v);
+        i32 val = 1;
+        i32* found = _Vector_i32_BinarySearch(&v, val);
+        TEST_ASSERT_NULL(r, found);
+        v.vptr->destroy(&v);
+    }
+
+    TEST_GROUP(r, "Vec(i32) BinarySearch duplicates");
+    {
+        Vec(i32) v;
+        Create(Vec(i32), &v);
+        int data[] = { 1, 2, 2, 2, 3 };
+        for (int i = 0; i < 5; i++) FT(Vec(i32), &v)->push_back(&v, data[i]);
+        i32 val = 2;
+        i32* found = _Vector_i32_BinarySearch(&v, val);
+        TEST_ASSERT_NOT_NULL(r, found);
+        TEST_ASSERT(r, found && *found == 2);
+        v.vptr->destroy(&v);
+    }
+
+    TEST_GROUP(r, "Vec(i32) LowerBound/UpperBound");
+    {
+        Vec(i32) v;
+        Create(Vec(i32), &v);
+        int data[] = { 1, 2, 2, 2, 3, 4 };
+        for (int i = 0; i < 6; i++) FT(Vec(i32), &v)->push_back(&v, data[i]);
+
+        i32 val = 2;
+        i32* lb = _Vector_i32_LowerBound(&v, val);
+        i32* ub = _Vector_i32_UpperBound(&v, val);
+        TEST_ASSERT(r, lb && *lb == 2);
+        TEST_ASSERT(r, ub && *ub == 3);
+        TEST_ASSERT(r, (umax)(ub - lb) == 3);
+
+        val = 5;
+        lb = _Vector_i32_LowerBound(&v, val);
+        TEST_ASSERT(r, lb == (i32*)v.data + v.size);
+        v.vptr->destroy(&v);
+    }
+}
+
+// ============================================================
+// Vector Find Tests (String)
+// ============================================================
+
+static void _test_vector_find_string(TestRunner* r)
+{
+    TEST_GROUP(r, "Vec(String) Find");
+    {
+        Vec(String) v;
+        Create(Vec(String), &v);
+        const char* words[] = { "apple", "banana", "cherry" };
+        for (int i = 0; i < 3; i++) {
+            String* s = format(words[i]);
+            FT(Vec(String), &v)->push_back(&v, *s);
+            Call(String, s, Delete);
+        }
+
+        String* needle = format("banana");
+        String* found = _Vector_String_Find(&v, *needle);
+        Call(String, needle, Delete);
+        TEST_ASSERT_NOT_NULL(r, found);
+        TEST_ASSERT(r, found && strcmp(found->data, "banana") == 0);
+        v.vptr->destroy(&v);
+    }
+
+    TEST_GROUP(r, "Vec(String) Find not found");
+    {
+        Vec(String) v;
+        Create(Vec(String), &v);
+        const char* words[] = { "apple", "cherry" };
+        for (int i = 0; i < 2; i++) {
+            String* s = format(words[i]);
+            FT(Vec(String), &v)->push_back(&v, *s);
+            Call(String, s, Delete);
+        }
+
+        String* needle = format("zzz");
+        String* found = _Vector_String_Find(&v, *needle);
+        Call(String, needle, Delete);
+        TEST_ASSERT_NULL(r, found);
+        v.vptr->destroy(&v);
+    }
+
+    TEST_GROUP(r, "Vec(String) Count");
+    {
+        Vec(String) v;
+        Create(Vec(String), &v);
+        const char* words[] = { "a", "b", "a", "c", "a" };
+        for (int i = 0; i < 5; i++) {
+            String* s = format(words[i]);
+            FT(Vec(String), &v)->push_back(&v, *s);
+            Call(String, s, Delete);
+        }
+
+        String* needle = format("a");
+        umax cnt = _Vector_String_Count(&v, *needle);
+        Call(String, needle, Delete);
+        TEST_ASSERT(r, cnt == 3);
+        v.vptr->destroy(&v);
+    }
+}
+
+// ============================================================
+// List Find Tests (POD)
+// ============================================================
+
+static bool _test_find_pred_list_i32(const i32* x) { return *x > 3; }
+
+static void _test_list_find_pod(TestRunner* r)
+{
+    TEST_GROUP(r, "List(i32) Find");
+    {
+        List(i32) l;
+        Create(List(i32), &l);
+        for (i32 i = 1; i <= 5; i++) Call(List(i32), &l, PushBack, i);
+        i32 val = 3;
+        i32* found = _List_i32_Find(&l, val);
+        TEST_ASSERT_NOT_NULL(r, found);
+        TEST_ASSERT(r, found && *found == 3);
+        l.vptr->destroy(&l);
+    }
+
+    TEST_GROUP(r, "List(i32) Find not found");
+    {
+        List(i32) l;
+        Create(List(i32), &l);
+        for (i32 i = 0; i < 5; i++) Call(List(i32), &l, PushBack, i);
+        i32 val = 99;
+        i32* found = _List_i32_Find(&l, val);
+        TEST_ASSERT_NULL(r, found);
+        l.vptr->destroy(&l);
+    }
+
+    TEST_GROUP(r, "List(i32) Find first/last");
+    {
+        List(i32) l;
+        Create(List(i32), &l);
+        for (i32 i = 0; i < 4; i++) Call(List(i32), &l, PushBack, i);
+        i32 first = 0;
+        i32 last = 3;
+        TEST_ASSERT_NOT_NULL(r, _List_i32_Find(&l, first));
+        TEST_ASSERT_NOT_NULL(r, _List_i32_Find(&l, last));
+        l.vptr->destroy(&l);
+    }
+
+    TEST_GROUP(r, "List(i32) Find empty");
+    {
+        List(i32) l;
+        Create(List(i32), &l);
+        i32 val = 1;
+        TEST_ASSERT_NULL(r, _List_i32_Find(&l, val));
+        l.vptr->destroy(&l);
+    }
+
+    TEST_GROUP(r, "List(i32) FindIf");
+    {
+        List(i32) l;
+        Create(List(i32), &l);
+        for (i32 i = 1; i <= 5; i++) Call(List(i32), &l, PushBack, i);
+        i32* found = _List_i32_FindIf(&l, _test_find_pred_list_i32);
+        TEST_ASSERT_NOT_NULL(r, found);
+        TEST_ASSERT(r, found && *found == 4);
+        l.vptr->destroy(&l);
+    }
+
+    TEST_GROUP(r, "List(i32) Count");
+    {
+        List(i32) l;
+        Create(List(i32), &l);
+        int data[] = { 1, 2, 2, 3, 2 };
+        for (int i = 0; i < 5; i++) Call(List(i32), &l, PushBack, data[i]);
+        i32 val = 2;
+        TEST_ASSERT(r, _List_i32_Count(&l, val) == 3);
+        val = 9;
+        TEST_ASSERT(r, _List_i32_Count(&l, val) == 0);
+        l.vptr->destroy(&l);
+    }
+}
+
+// ============================================================
+// DList Find Tests (POD)
+// ============================================================
+
+static bool _test_find_pred_dlist_i32(const i32* x) { return *x < 0; }
+
+static void _test_dlist_find_pod(TestRunner* r)
+{
+    TEST_GROUP(r, "DList(i32) Find");
+    {
+        DList(i32) l;
+        Create(DList(i32), &l);
+        for (i32 i = 1; i <= 5; i++) Call(DList(i32), &l, PushBack, i);
+        i32 val = 4;
+        i32* found = _DoublyList_i32_Find(&l, val);
+        TEST_ASSERT_NOT_NULL(r, found);
+        TEST_ASSERT(r, found && *found == 4);
+        l.vptr->destroy(&l);
+    }
+
+    TEST_GROUP(r, "DList(i32) Find not found");
+    {
+        DList(i32) l;
+        Create(DList(i32), &l);
+        for (i32 i = 0; i < 3; i++) Call(DList(i32), &l, PushBack, i);
+        i32 val = 99;
+        TEST_ASSERT_NULL(r, _DoublyList_i32_Find(&l, val));
+        l.vptr->destroy(&l);
+    }
+
+    TEST_GROUP(r, "DList(i32) Find empty");
+    {
+        DList(i32) l;
+        Create(DList(i32), &l);
+        TEST_ASSERT_NULL(r, _DoublyList_i32_Find(&l, (i32)1));
+        l.vptr->destroy(&l);
+    }
+
+    TEST_GROUP(r, "DList(i32) FindIf none");
+    {
+        DList(i32) l;
+        Create(DList(i32), &l);
+        for (i32 i = 1; i <= 5; i++) Call(DList(i32), &l, PushBack, i);
+        i32* found = _DoublyList_i32_FindIf(&l, _test_find_pred_dlist_i32);
+        TEST_ASSERT_NULL(r, found);
+        l.vptr->destroy(&l);
+    }
+
+    TEST_GROUP(r, "DList(i32) Count");
+    {
+        DList(i32) l;
+        Create(DList(i32), &l);
+        int data[] = { 3, 1, 3, 2, 3 };
+        for (int i = 0; i < 5; i++) Call(DList(i32), &l, PushBack, data[i]);
+        i32 val = 3;
+        TEST_ASSERT(r, _DoublyList_i32_Count(&l, val) == 3);
+        val = 4;
+        TEST_ASSERT(r, _DoublyList_i32_Count(&l, val) == 0);
+        l.vptr->destroy(&l);
+    }
+}
+
+// ============================================================
 // 主入口
 // ============================================================
 
@@ -687,11 +1067,15 @@ void algorithm_test(void)
     _test_vector_sort_pod(&runner);
     _test_list_sort_pod(&runner);
     _test_dlist_sort_pod(&runner);
+    _test_vector_find_pod(&runner);
+    _test_list_find_pod(&runner);
+    _test_dlist_find_pod(&runner);
     #endif
     #ifdef ALGORITHM_TEST_STRING
     _test_vector_sort_string(&runner);
     _test_list_sort_string(&runner);
     _test_dlist_sort_string(&runner);
+    _test_vector_find_string(&runner);
     #endif
 
     TEST_END(&runner);

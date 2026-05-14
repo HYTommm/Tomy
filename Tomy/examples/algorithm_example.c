@@ -16,6 +16,9 @@ static int cmp_desc(const i32* a, const i32* b)
     return (*a < *b) - (*a > *b);
 }
 
+/* 谓词：偶数 */
+static bool is_even(const i32* x) { return *x % 2 == 0; }
+
 int main(void)
 {
     /* ========== 1. Vector 排序 ========== */
@@ -152,6 +155,85 @@ int main(void)
     println("iterator product:", prod);
 
     fv.vptr->destroy(&fv);
+
+    /* ========== 7. 查找 ========== */
+    println("\n=== Vec(i32) 查找 ===");
+
+    Vec(i32) sv;
+    Create(Vec(i32), &sv);
+    for (i32 i = 10; i <= 50; i += 10)
+        FT(Vec(i32), &sv)->push_back(&sv, i);
+
+    i32* found = FIND(Vec(i32), &sv, (i32)30);
+    if (found) println("Find 30:", *found);
+
+    found = FIND(Vec(i32), &sv, (i32)99);
+    if (!found) println("Find 99: not found");
+
+    /* FindIf */
+    found = FIND_IF(Vec(i32), &sv, is_even);
+    if (found) println("First even:", *found);
+
+    sv.vptr->destroy(&sv);
+
+    /* ========== 8. 二分查找（需要排序）========== */
+    println("\n=== Vec(i32) 二分查找 ===");
+
+    Vec(i32) bv;
+    Create(Vec(i32), &bv);
+    for (i32 i = 1; i <= 10; i++)
+        FT(Vec(i32), &bv)->push_back(&bv, i);
+
+    i32* bs = BINARY_SEARCH(Vec(i32), &bv, (i32)7);
+    println("BinarySearch 7:", bs ? *bs : -1);
+
+    bs = BINARY_SEARCH(Vec(i32), &bv, (i32)99);
+    println("BinarySearch 99:", bs ? "found" : "not found");
+
+    /* LowerBound / UpperBound */
+    FT(Vec(i32), &bv)->push_back(&bv, 7);
+    FT(Vec(i32), &bv)->push_back(&bv, 7);
+    SORT(Vec(i32), &bv);
+
+    i32* lb = LOWER_BOUND(Vec(i32), &bv, (i32)7);
+    i32* ub = UPPER_BOUND(Vec(i32), &bv, (i32)7);
+    println("7 appears", (umax)(ub - lb), "times");
+
+    bv.vptr->destroy(&bv);
+
+    /* ========== 9. 计数 ========== */
+    println("\n=== Vec(i32) 计数 ===");
+
+    Vec(i32) cv;
+    Create(Vec(i32), &cv);
+    int cv_data[] = { 1, 2, 2, 3, 2, 4, 2 };
+    for (int i = 0; i < 7; i++)
+        FT(Vec(i32), &cv)->push_back(&cv, cv_data[i]);
+
+    umax cnt = COUNT(Vec(i32), &cv, (i32)2);
+    println("Count of 2:", cnt);
+    println("Count of 5:", COUNT(Vec(i32), &cv, (i32)5));
+
+    cv.vptr->destroy(&cv);
+
+    /* ========== 10. 反转 ========== */
+    println("\n=== Vec(i32) 反转 ===");
+
+    Vec(i32) rv;
+    Create(Vec(i32), &rv);
+    for (i32 i = 1; i <= 6; i++)
+        FT(Vec(i32), &rv)->push_back(&rv, i);
+
+    print("before:");
+    foreach (Vec(i32), val, rv) { print(" ", val); }
+    println();
+
+    REVERSE(Vec(i32), &rv);
+    print("after:");
+    foreach (Vec(i32), val, rv) { print(" ", val); }
+    println();
+
+    rv.vptr->destroy(&rv);
 
     return 0;
 }

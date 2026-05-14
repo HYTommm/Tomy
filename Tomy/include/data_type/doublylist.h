@@ -322,6 +322,9 @@ inline void _DoublyListBase_Reverse(_DoublyListBase* self)
     bool _DoublyList_##T##_IsEmpty(const DoublyList_##T* self);                                    \
     umax _DoublyList_##T##_Size(const DoublyList_##T* self);                                       \
     void _DoublyList_##T##_Reverse(DoublyList_##T* self);                                          \
+    T* _DoublyList_##T##_Find(DoublyList_##T* self, T value);                                    \
+    T* _DoublyList_##T##_FindIf(DoublyList_##T* self, bool (*pred)(const T*));                    \
+    umax _DoublyList_##T##_Count(DoublyList_##T* self, T value);                                  \
     DoublyList_##T##_Iterator _DoublyList_##T##_Begin(const DoublyList_##T* self);                 \
     DoublyList_##T##_Iterator _DoublyList_##T##_End(const DoublyList_##T* self);                   \
                                                                                                    \
@@ -610,6 +613,40 @@ inline void _DoublyListBase_Reverse(_DoublyListBase* self)
         self->head.prev = new_tail;                                                          \
         if (new_tail) new_tail->next = &self->head;                                          \
         else self->head.next = self->head.prev = &self->head;                                \
+    }                                                                                               \
+    inline T* _DoublyList_##T##_Find(DoublyList_##T* self, T value) {                              \
+        ERR_RET_V_NULL(self, NULL);                                                                \
+        if (!self->cmp || self->size == 0) return NULL;                                            \
+        _DListNode* curr = self->head.next;                                                        \
+        while (curr != &self->head) {                                                              \
+            T* data = (T*)_DList_Data(curr);                                                       \
+            if (self->cmp(data, &value) == 0) return data;                                         \
+            curr = curr->next;                                                                     \
+        }                                                                                          \
+        return NULL;                                                                               \
+    }                                                                                              \
+    inline T* _DoublyList_##T##_FindIf(DoublyList_##T* self, bool (*pred)(const T*)) {             \
+        ERR_RET_V_NULL(self, NULL);                                                                \
+        ERR_RET_V_NULL(pred, NULL);                                                                \
+        _DListNode* curr = self->head.next;                                                        \
+        while (curr != &self->head) {                                                              \
+            T* data = (T*)_DList_Data(curr);                                                       \
+            if (pred(data)) return data;                                                           \
+            curr = curr->next;                                                                     \
+        }                                                                                          \
+        return NULL;                                                                               \
+    }                                                                                              \
+    inline umax _DoublyList_##T##_Count(DoublyList_##T* self, T value) {                           \
+        ERR_RET_V_NULL(self, 0);                                                                   \
+        if (!self->cmp || self->size == 0) return 0;                                               \
+        _DListNode* curr = self->head.next;                                                        \
+        umax count = 0;                                                                            \
+        while (curr != &self->head) {                                                              \
+            T* data = (T*)_DList_Data(curr);                                                       \
+            if (self->cmp(data, &value) == 0) count++;                                             \
+            curr = curr->next;                                                                     \
+        }                                                                                          \
+        return count;                                                                              \
     }
 
 #define _DLIST_IMPL_EX2(T, CONSTRUCT, DESTROY, COPY, CMP)  _DLIST_IMPL_EX1(T, CONSTRUCT, DESTROY, COPY, CMP)

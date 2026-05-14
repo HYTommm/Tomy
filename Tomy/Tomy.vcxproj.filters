@@ -104,7 +104,7 @@
     <ClCompile Include="src\test_vector.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="examples\oop_example.c">
+    <ClCompile Include="src\main.c">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

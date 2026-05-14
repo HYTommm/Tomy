@@ -298,6 +298,9 @@ inline void _ListBase_Reverse(_ListBase* self)
     bool _List_##T##_IsEmpty(const List_##T* self);                                             \
     umax _List_##T##_Size(const List_##T* self);                                                \
     void _List_##T##_Reverse(List_##T* self);                                                   \
+    T* _List_##T##_Find(List_##T* self, T value);                                             \
+    T* _List_##T##_FindIf(List_##T* self, bool (*pred)(const T*));                             \
+    umax _List_##T##_Count(List_##T* self, T value);                                           \
     List_##T##_Iterator _List_##T##_Begin(const List_##T* self);                               \
     List_##T##_Iterator _List_##T##_End(const List_##T* self);                                 \
     List_##T##_Iterator _List_##T##_BeforeBegin(const List_##T* self);                         \
@@ -546,6 +549,40 @@ inline void _ListBase_Reverse(_ListBase* self)
         _ListNode* cur = new_head;                                                                     \
         while (cur && cur->next) cur = cur->next;                                                      \
         self->tail = cur ? cur : &self->head;                                                          \
+    }                                                                                                  \
+    inline T* _List_##T##_Find(List_##T* self, T value) {                                              \
+        ERR_RET_V_NULL(self, NULL);                                                                    \
+        if (!self->cmp || self->size == 0) return NULL;                                                \
+        _ListNode* curr = self->head.next;                                                             \
+        while (curr) {                                                                                 \
+            T* data = (T*)_List_Data(curr);                                                            \
+            if (self->cmp(data, &value) == 0) return data;                                             \
+            curr = curr->next;                                                                         \
+        }                                                                                              \
+        return NULL;                                                                                   \
+    }                                                                                                  \
+    inline T* _List_##T##_FindIf(List_##T* self, bool (*pred)(const T*)) {                             \
+        ERR_RET_V_NULL(self, NULL);                                                                    \
+        ERR_RET_V_NULL(pred, NULL);                                                                    \
+        _ListNode* curr = self->head.next;                                                             \
+        while (curr) {                                                                                 \
+            T* data = (T*)_List_Data(curr);                                                            \
+            if (pred(data)) return data;                                                               \
+            curr = curr->next;                                                                         \
+        }                                                                                              \
+        return NULL;                                                                                   \
+    }                                                                                                  \
+    inline umax _List_##T##_Count(List_##T* self, T value) {                                           \
+        ERR_RET_V_NULL(self, 0);                                                                       \
+        if (!self->cmp || self->size == 0) return 0;                                                   \
+        _ListNode* curr = self->head.next;                                                             \
+        umax count = 0;                                                                                \
+        while (curr) {                                                                                 \
+            T* data = (T*)_List_Data(curr);                                                            \
+            if (self->cmp(data, &value) == 0) count++;                                                 \
+            curr = curr->next;                                                                         \
+        }                                                                                              \
+        return count;                                                                                  \
     }                                                                                                  \
 
 #define _LIST_IMPL_EX2(T, CONSTRUCT, DESTROY, COPY, CMP)  _LIST_IMPL_EX1(T, CONSTRUCT, DESTROY, COPY, CMP)

@@ -575,6 +575,13 @@ void _Vector_##T##_ShrinkToFit(Vector_##T* self);                               
 void _Vector_##T##_Swap(Vector_##T* self, Vector_##T* other);                               \
 T* _Vector_##T##_EmplaceBack(Vector_##T* self);                                              \
 void _Vector_##T##_SwapErase(Vector_##T* self, umax index);                                  \
+T* _Vector_##T##_Find(Vector_##T* self, T value);                                          \
+T* _Vector_##T##_FindIf(Vector_##T* self, bool (*pred)(const T*));                          \
+T* _Vector_##T##_BinarySearch(Vector_##T* self, T value);                                   \
+T* _Vector_##T##_LowerBound(Vector_##T* self, T value);                                     \
+T* _Vector_##T##_UpperBound(Vector_##T* self, T value);                                     \
+umax _Vector_##T##_Count(Vector_##T* self, T value);                                        \
+void _Vector_##T##_Reverse(Vector_##T* self);                                               \
                                                                                             \
     void _Vector_##T##_Iterator##_Create(Vector_##T##_Iterator* self);                      \
     void _Vector_##T##_Iterator##_Destroy(Vector_##T##_Iterator* self);                     \
@@ -784,6 +791,89 @@ static inline void _Vector_##T##_Sort(Vector_##T* self, int (*cmp)(const T*, con
     if (!cmp) cmp = (int (*)(const T*, const T*))self->cmp;                                  \
     qsort(self->data, self->size, sizeof(T), (int (*)(const void*, const void*))cmp);        \
 }                                                                                            \
+                                                                                             \
+static inline T* _Vector_##T##_Find(Vector_##T* self, T value) {                            \
+    ERR_RET_V_NULL(self, NULL);                                                              \
+    if (!self->cmp || self->size == 0) return NULL;                                          \
+    T* data = (T*)self->data;                                                                \
+    for (umax i = 0; i < self->size; i++) {                                                  \
+        if (self->cmp(&data[i], &value) == 0) return &data[i];                               \
+    }                                                                                        \
+    return NULL;                                                                             \
+}                                                                                            \
+                                                                                             \
+static inline T* _Vector_##T##_FindIf(Vector_##T* self, bool (*pred)(const T*)) {            \
+    ERR_RET_V_NULL(self, NULL);                                                              \
+    ERR_RET_V_NULL(pred, NULL);                                                              \
+    T* data = (T*)self->data;                                                                \
+    for (umax i = 0; i < self->size; i++) {                                                  \
+        if (pred(&data[i])) return &data[i];                                                 \
+    }                                                                                        \
+    return NULL;                                                                             \
+}                                                                                            \
+                                                                                             \
+static inline T* _Vector_##T##_BinarySearch(Vector_##T* self, T value) {                     \
+    ERR_RET_V_NULL(self, NULL);                                                              \
+    if (!self->cmp || self->size == 0) return NULL;                                          \
+    T* data = (T*)self->data;                                                                \
+    umax lo = 0, hi = self->size;                                                            \
+    while (lo < hi) {                                                                        \
+        umax mid = lo + (hi - lo) / 2;                                                       \
+        int c = self->cmp(&data[mid], &value);                                               \
+        if (c < 0) lo = mid + 1;                                                             \
+        else if (c > 0) hi = mid;                                                            \
+        else return &data[mid];                                                              \
+    }                                                                                        \
+    return NULL;                                                                             \
+}                                                                                            \
+                                                                                             \
+static inline T* _Vector_##T##_LowerBound(Vector_##T* self, T value) {                       \
+    ERR_RET_V_NULL(self, NULL);                                                              \
+    if (!self->cmp) return NULL;                                                             \
+    T* data = (T*)self->data;                                                                \
+    umax lo = 0, hi = self->size;                                                            \
+    while (lo < hi) {                                                                        \
+        umax mid = lo + (hi - lo) / 2;                                                       \
+        if (self->cmp(&data[mid], &value) < 0) lo = mid + 1;                                 \
+        else hi = mid;                                                                       \
+    }                                                                                        \
+    return data + lo;                                                                        \
+}                                                                                            \
+                                                                                             \
+static inline T* _Vector_##T##_UpperBound(Vector_##T* self, T value) {                       \
+    ERR_RET_V_NULL(self, NULL);                                                              \
+    if (!self->cmp) return NULL;                                                             \
+    T* data = (T*)self->data;                                                                \
+    umax lo = 0, hi = self->size;                                                            \
+    while (lo < hi) {                                                                        \
+        umax mid = lo + (hi - lo) / 2;                                                       \
+        if (self->cmp(&data[mid], &value) <= 0) lo = mid + 1;                                \
+        else hi = mid;                                                                       \
+    }                                                                                        \
+    return data + lo;                                                                        \
+}                                                                                            \
+                                                                                             \
+static inline umax _Vector_##T##_Count(Vector_##T* self, T value) {                          \
+    ERR_RET_V_NULL(self, 0);                                                                 \
+    if (!self->cmp || self->size == 0) return 0;                                             \
+    T* data = (T*)self->data;                                                                \
+    umax count = 0;                                                                          \
+    for (umax i = 0; i < self->size; i++) {                                                  \
+        if (self->cmp(&data[i], &value) == 0) count++;                                       \
+    }                                                                                        \
+    return count;                                                                            \
+}                                                                                            \
+                                                                                             \
+static inline void _Vector_##T##_Reverse(Vector_##T* self) {                                 \
+    ERR_RET_NULL(self);                                                                      \
+    if (self->size <= 1) return;                                                             \
+    T* data = (T*)self->data;                                                                \
+    for (umax i = 0, j = self->size - 1; i < j; i++, j--) {                                 \
+        T tmp = data[i];                                                                     \
+        data[i] = data[j];                                                                   \
+        data[j] = tmp;                                                                       \
+    }                                                                                        \
+}
 
 #define _VECTOR_IMPL_EX2(T, CONSTRUCT, DESTROY, COPY, CMP) _VECTOR_IMPL_EX1(T, CONSTRUCT, DESTROY, COPY, CMP)
 #define _VECTOR_IMPL_EX3(T, CONSTRUCT, DESTROY, COPY, CMP) _VECTOR_IMPL_EX2(T, CONSTRUCT, DESTROY, COPY, CMP)
