@@ -575,13 +575,13 @@ void _Vector_##T##_ShrinkToFit(Vector_##T* self);                               
 void _Vector_##T##_Swap(Vector_##T* self, Vector_##T* other);                               \
 T* _Vector_##T##_EmplaceBack(Vector_##T* self);                                              \
 void _Vector_##T##_SwapErase(Vector_##T* self, umax index);                                  \
-T* _Vector_##T##_Find(Vector_##T* self, T value);                                          \
-T* _Vector_##T##_FindIf(Vector_##T* self, bool (*pred)(const T*));                          \
-T* _Vector_##T##_BinarySearch(Vector_##T* self, T value);                                   \
-T* _Vector_##T##_LowerBound(Vector_##T* self, T value);                                     \
-T* _Vector_##T##_UpperBound(Vector_##T* self, T value);                                     \
-umax _Vector_##T##_Count(Vector_##T* self, T value);                                        \
-void _Vector_##T##_Reverse(Vector_##T* self);                                               \
+static inline T* _Vector_##T##_Find(Vector_##T* self, T value);                                   \
+static inline T* _Vector_##T##_FindIf(Vector_##T* self, bool (*pred)(const T*));                  \
+static inline T* _Vector_##T##_BinarySearch(Vector_##T* self, T value);                            \
+static inline T* _Vector_##T##_LowerBound(Vector_##T* self, T value);                             \
+static inline T* _Vector_##T##_UpperBound(Vector_##T* self, T value);                             \
+static inline umax _Vector_##T##_Count(Vector_##T* self, T value);                               \
+static inline void _Vector_##T##_Reverse(Vector_##T* self);                                      \
                                                                                             \
     void _Vector_##T##_Iterator##_Create(Vector_##T##_Iterator* self);                      \
     void _Vector_##T##_Iterator##_Destroy(Vector_##T##_Iterator* self);                     \
