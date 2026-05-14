@@ -50,6 +50,9 @@ else()
   add_compile_options(-Wno-unused-parameter -Wno-unused-function -Wno-unused-variable)
   # 生效 typedef 匿名结构体嵌入（代码通过 VTABLE{ FROM(base) ... } 实现继承）
   add_compile_options(-fms-extensions)
+  # Debug 模式用 -Og 代替默认 -O0，使 C23 inline 生成 COMDAT/weak symbol
+  # 避免 inline 函数在多个 TU 中重复定义（对齐 C++ inline 语义）
+  add_compile_options($<$<CONFIG:Debug>:-Og>)
 endif()
 
 # ═══════════════════════════════════════════════════════════════
