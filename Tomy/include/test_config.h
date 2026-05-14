@@ -60,6 +60,8 @@
 #define POOLDList_TEST_EDGE
 #endif
 
+#define LIFETIME_TEST
+
 #define BENCHMARK
 #ifdef BENCHMARK
 #define BENCHMARK_LIST

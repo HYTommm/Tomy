@@ -51,6 +51,9 @@ void algorithm_test(void);
 #ifdef BENCHMARK
 void benchmark(void);
 #endif
+#ifdef LIFETIME_TEST
+void lifetime_test(void);
+#endif
 
 void test(void)
 {
@@ -95,6 +98,9 @@ void test(void)
 #endif
 #ifdef BENCHMARK
     benchmark();
+#endif
+#ifdef LIFETIME_TEST
+    lifetime_test();
 #endif
 }
 
