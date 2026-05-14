@@ -18,10 +18,10 @@ CLASS{
     _Object_VTable * vptr;
 }Object;
 
-void Object_Create(Object* self);
-void _Object_Destroy(Object* self);
-Object* Object_New();
-void _Object_Delete(Object* self);
+INLINE void Object_Create(Object* self);
+INLINE void _Object_Destroy(Object* self);
+INLINE Object* Object_New();
+INLINE void _Object_Delete(Object* self);
 String* _Object_ToString(Object* self);
 
 INLINE void Object_Create(Object* self)
