@@ -46,7 +46,7 @@ endif()
 if(MSVC)
   add_compile_options(/W3)
 else()
-  add_compile_options(-Wall -Wextra -Wpedantic)
+  add_compile_options(-Wall -Wextra)
   # 启用 typedef 匿名结构体嵌入（代码通过 VTABLE{ FROM(base) ... } 实现继承）
   add_compile_options(-fms-extensions)
 endif()

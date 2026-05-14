@@ -1,4 +1,8 @@
-﻿#define _CRT_SECURE_NO_WARNINGS
+﻿#ifndef _WIN32
+#define _POSIX_C_SOURCE 199309L
+#endif
+
+#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
