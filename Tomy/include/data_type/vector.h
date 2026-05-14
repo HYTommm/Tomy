@@ -63,7 +63,7 @@ void _VectorBase_SwapErase(_VectorBase* self, umax index);
 void _VectorBase_ShrinkToFit(_VectorBase* self);
 void _VectorBase_Swap(_VectorBase* self, _VectorBase* other);
 
-inline void _VectorBase_Create(_VectorBase* self, const umax elem_size, ElemConstructor* const construct, ElemDestructor* destroy, ElemCopy* const copy, const CmpFunc cmp)
+INLINE void _VectorBase_Create(_VectorBase* self, const umax elem_size, ElemConstructor* const construct, ElemDestructor* destroy, ElemCopy* const copy, const CmpFunc cmp)
 {
     ERR_RET_NULL(self);
     Object_Create((Object*)self);
@@ -77,7 +77,7 @@ inline void _VectorBase_Create(_VectorBase* self, const umax elem_size, ElemCons
     self->cmp = cmp;
 }
 
-inline void _VectorBase_Destroy(_VectorBase* self)
+INLINE void _VectorBase_Destroy(_VectorBase* self)
 {
     ERR_RET_NULL(self);
     if (self->destroy && self->data)
@@ -95,7 +95,7 @@ inline void _VectorBase_Destroy(_VectorBase* self)
     self->elem_size = 0;
 }
 
-inline _VectorBase* _VectorBase_New(const umax elem_size, ElemConstructor* const construct, ElemDestructor* const destroy, ElemCopy* const copy, const CmpFunc cmp)
+INLINE _VectorBase* _VectorBase_New(const umax elem_size, ElemConstructor* const construct, ElemDestructor* const destroy, ElemCopy* const copy, const CmpFunc cmp)
 {
     _VectorBase* self = (_VectorBase*)malloc(sizeof(_VectorBase));
     ERR_RET_V_NULL(self, NULL);
@@ -103,19 +103,19 @@ inline _VectorBase* _VectorBase_New(const umax elem_size, ElemConstructor* const
     return self;
 }
 
-inline void _VectorBase_Delete(_VectorBase* self)
+INLINE void _VectorBase_Delete(_VectorBase* self)
 {
     ERR_RET_NULL(self);
     _VectorBase_Destroy(self);
     free(self);
 }
 
-inline bool _VectorBase_IsEmpty(const _VectorBase* self)
+INLINE bool _VectorBase_IsEmpty(const _VectorBase* self)
 {
     return self->size == 0;
 }
 
-inline void _VectorBase_Resize(_VectorBase* self, const umax new_size)
+INLINE void _VectorBase_Resize(_VectorBase* self, const umax new_size)
 {
     ERR_RET_NULL(self);
 
@@ -166,7 +166,7 @@ inline void _VectorBase_Resize(_VectorBase* self, const umax new_size)
     self->size = new_size;
 }
 
-inline void _VectorBase_Reserve(_VectorBase* self, const umax new_capacity)
+INLINE void _VectorBase_Reserve(_VectorBase* self, const umax new_capacity)
 {
     ERR_RET_NULL(self);
     ERR_RET_V_COND(new_capacity <= self->capacity, );
@@ -207,7 +207,7 @@ inline void _VectorBase_Reserve(_VectorBase* self, const umax new_capacity)
     }
 }
 
-inline void _VectorBase_Clear(_VectorBase* self)
+INLINE void _VectorBase_Clear(_VectorBase* self)
 {
     ERR_RET_NULL(self);
     if (self->destroy && self->data)
@@ -220,7 +220,7 @@ inline void _VectorBase_Clear(_VectorBase* self)
     // keep capacity and data for reuse
 }
 
-inline void* _VectorBase_At(const _VectorBase* self, const umax index)
+INLINE void* _VectorBase_At(const _VectorBase* self, const umax index)
 {
     ERR_RET_V_NULL(self, NULL);
     ERR_RET_V_COND(self->elem_size == 0, NULL);
@@ -229,7 +229,7 @@ inline void* _VectorBase_At(const _VectorBase* self, const umax index)
     return (byte*)self->data + index * self->elem_size;
 }
 
-inline void* _VectorBase_Front(const _VectorBase* self)
+INLINE void* _VectorBase_Front(const _VectorBase* self)
 {
     ERR_RET_V_NULL(self, NULL);
     ERR_RET_V_COND(self->elem_size == 0, NULL);
@@ -237,7 +237,7 @@ inline void* _VectorBase_Front(const _VectorBase* self)
     return self->data;
 }
 
-inline void* _VectorBase_Back(const _VectorBase* self)
+INLINE void* _VectorBase_Back(const _VectorBase* self)
 {
     ERR_RET_V_NULL(self, NULL);
     ERR_RET_V_COND(self->elem_size == 0, NULL);
@@ -245,13 +245,13 @@ inline void* _VectorBase_Back(const _VectorBase* self)
     return (byte*)self->data + (self->size - 1) * self->elem_size;
 }
 
-inline void* _VectorBase_Data(const _VectorBase* self)
+INLINE void* _VectorBase_Data(const _VectorBase* self)
 {
     ERR_RET_V_NULL(self, NULL);
     return self->data;
 }
 
-inline void _VectorBase_PushBack(_VectorBase* self, const void* elem)
+INLINE void _VectorBase_PushBack(_VectorBase* self, const void* elem)
 {
     ERR_RET_NULL(self);
     ERR_RET_NULL(elem);
@@ -281,7 +281,7 @@ inline void _VectorBase_PushBack(_VectorBase* self, const void* elem)
     self->size += 1;
 }
 
-inline void _VectorBase_PopBack(_VectorBase* self)
+INLINE void _VectorBase_PopBack(_VectorBase* self)
 {
     ERR_RET_NULL(self);
     ERR_RET_V_COND(self->elem_size == 0, );
@@ -294,7 +294,7 @@ inline void _VectorBase_PopBack(_VectorBase* self)
     self->size -= 1;
 }
 
-inline void _VectorBase_Erase(_VectorBase* self, const umax index)
+INLINE void _VectorBase_Erase(_VectorBase* self, const umax index)
 {
     ERR_RET_NULL(self);
     ERR_RET_V_COND(self->elem_size == 0, );
@@ -342,7 +342,7 @@ inline void _VectorBase_Erase(_VectorBase* self, const umax index)
     self->size -= 1;
 }
 
-inline void _VectorBase_Insert(_VectorBase* self, const umax index, const void* elem)
+INLINE void _VectorBase_Insert(_VectorBase* self, const umax index, const void* elem)
 {
     ERR_RET_NULL(self);
     ERR_RET_NULL(elem);
@@ -403,7 +403,7 @@ inline void _VectorBase_Insert(_VectorBase* self, const umax index, const void* 
     self->size += 1;
 }
 
-inline void* _VectorBase_EmplaceBack(_VectorBase* self)
+INLINE void* _VectorBase_EmplaceBack(_VectorBase* self)
 {
     ERR_RET_V_NULL(self, NULL);
 
@@ -430,7 +430,7 @@ inline void* _VectorBase_EmplaceBack(_VectorBase* self)
     return dest;
 }
 
-inline void _VectorBase_SwapErase(_VectorBase* self, const umax index)
+INLINE void _VectorBase_SwapErase(_VectorBase* self, const umax index)
 {
     ERR_RET_NULL(self);
     ERR_RET_V_COND(self->elem_size == 0, );
@@ -466,7 +466,7 @@ inline void _VectorBase_SwapErase(_VectorBase* self, const umax index)
     self->size -= 1;
 }
 
-inline void _VectorBase_ShrinkToFit(_VectorBase* self)
+INLINE void _VectorBase_ShrinkToFit(_VectorBase* self)
 {
     ERR_RET_NULL(self);
     if (self->size == self->capacity)    return;
@@ -506,7 +506,7 @@ inline void _VectorBase_ShrinkToFit(_VectorBase* self)
     self->capacity = self->size;
 }
 
-inline void _VectorBase_Swap(_VectorBase* self, _VectorBase* other)
+INLINE void _VectorBase_Swap(_VectorBase* self, _VectorBase* other)
 {
     ERR_RET_NULL(self);
     ERR_RET_NULL(other);
@@ -594,7 +594,7 @@ static inline void _Vector_##T##_Reverse(Vector_##T* self);                     
     bool _Vector_##T##_Iterator##_Equals(                                                   \
         const Vector_##T##_Iterator* self, const Vector_##T##_Iterator* other);             \
                                                                                             \
-    inline void _Vector_##T##_Iterator##_Create(Vector_##T##_Iterator* self) {              \
+    INLINE void _Vector_##T##_Iterator##_Create(Vector_##T##_Iterator* self) {              \
         static _Vector_##T##_Iterator##_VTable _Vector_##T##_Iterator##_VTable_Instance = { \
             _Vector_##T##_Iterator##_Create,                                                \
             _Vector_##T##_Iterator##_Destroy,                                               \
@@ -611,40 +611,40 @@ static inline void _Vector_##T##_Reverse(Vector_##T* self);                     
         ((Object*)self)->vptr = (void*)&_Vector_##T##_Iterator##_VTable_Instance;           \
         self->ptr = NULL;                                                                   \
     }                                                                                       \
-    inline void _Vector_##T##_Iterator##_Destroy(Vector_##T##_Iterator* self) {             \
+    INLINE void _Vector_##T##_Iterator##_Destroy(Vector_##T##_Iterator* self) {             \
         _Object_Destroy((Object*)self);                                                     \
     }                                                                                       \
-    inline Vector_##T##_Iterator* _Vector_##T##_Iterator##_New() {                          \
+    INLINE Vector_##T##_Iterator* _Vector_##T##_Iterator##_New() {                          \
         Vector_##T##_Iterator* self = malloc(sizeof(Vector_##T##_Iterator));                \
         ERR_RET_V_NULL(self, NULL);                                                         \
         _Vector_##T##_Iterator##_Create(self);                                              \
         return self;                                                                        \
     }                                                                                       \
-    inline void _Vector_##T##_Iterator##_Delete(Vector_##T##_Iterator* self) {              \
+    INLINE void _Vector_##T##_Iterator##_Delete(Vector_##T##_Iterator* self) {              \
         _Vector_##T##_Iterator##_Destroy(self);                                             \
         free(self);                                                                         \
     }                                                                                       \
-    inline String* _Vector_##T##_Iterator##_ToString(Vector_##T##_Iterator* self) {         \
+    INLINE String* _Vector_##T##_Iterator##_ToString(Vector_##T##_Iterator* self) {         \
         String* str = New(String, STRING_CAPACITY);                                          \
         Call(String, str, Append, "VectorIterator");                                             \
         return str;                                                                         \
     }                                                                                       \
-    inline T* _Vector_##T##_Iterator##_Raw(const Vector_##T##_Iterator* self) {             \
+    INLINE T* _Vector_##T##_Iterator##_Raw(const Vector_##T##_Iterator* self) {             \
         return self->ptr;                                                                   \
     }                                                                                       \
-    inline T _Vector_##T##_Iterator##_Get(const Vector_##T##_Iterator* self) {              \
+    INLINE T _Vector_##T##_Iterator##_Get(const Vector_##T##_Iterator* self) {              \
         return self->ptr ? *(self->ptr) : (T){0};                                           \
     }                                                                                       \
-    inline void _Vector_##T##_Iterator##_Next(Vector_##T##_Iterator* self) {                \
+    INLINE void _Vector_##T##_Iterator##_Next(Vector_##T##_Iterator* self) {                \
         Vector_##T##_Iterator* it = (Vector_##T##_Iterator*)self;                           \
         if (it->ptr) ++it->ptr;                                                             \
     }                                                                                       \
-    inline bool _Vector_##T##_Iterator##_Equals(                                            \
+    INLINE bool _Vector_##T##_Iterator##_Equals(                                            \
         const Vector_##T##_Iterator* self, const Vector_##T##_Iterator* other) {            \
         return self->ptr == other->ptr;                                                     \
     }                                                                                       \
                                                                                             \
-inline void _Vector_##T##_Create(Vector_##T* self) {                                        \
+INLINE void _Vector_##T##_Create(Vector_##T* self) {                                        \
     static _Vector_##T##_VTable _Vector_##T##_VTable_Instance = {                           \
         _Vector_##T##_Create,                                                               \
         _VectorBase_Destroy,                                                                \
@@ -675,10 +675,10 @@ inline void _Vector_##T##_Create(Vector_##T* self) {                            
     _VectorBase_Create((_VectorBase*)self, sizeof(T), CONSTRUCT, DESTROY, COPY, CMP);            \
     self->vptr = (void*)&_Vector_##T##_VTable_Instance;                                     \
 }                                                                                           \
-inline Vector_##T* _Vector_##T##_New() {                                                    \
+INLINE Vector_##T* _Vector_##T##_New() {                                                    \
     return (Vector_##T*)_VectorBase_New(sizeof(T), CONSTRUCT, DESTROY, COPY, CMP);               \
 }                                                                                           \
-inline String* _Vector_##T##_ToString(Vector_##T* self) {                                   \
+INLINE String* _Vector_##T##_ToString(Vector_##T* self) {                                   \
     String* str = New(String, STRING_CAPACITY);                                              \
     Call(String, str, Append, "Vector");                                                         \
     char buf[TEMP_BUFFER_SIZE] = { 0 };                                                     \
@@ -689,12 +689,12 @@ inline String* _Vector_##T##_ToString(Vector_##T* self) {                       
     Call(String, str, AppendN, buf, len);                                                        \
     return str;                                                                             \
 }                                                                                           \
-inline void _Vector_##T##_Resize(Vector_##T* self, const umax new_size) {                   \
+INLINE void _Vector_##T##_Resize(Vector_##T* self, const umax new_size) {                   \
     _VectorBase_Resize((_VectorBase*)self, new_size);                                       \
     self->front = (T*)_VectorBase_Front((_VectorBase*)self);                                \
     self->back = (T*)_VectorBase_Back((_VectorBase*)self);                                  \
 }                                                                                           \
-inline void _Vector_##T##_Reserve(Vector_##T* self, const umax new_capacity) {              \
+INLINE void _Vector_##T##_Reserve(Vector_##T* self, const umax new_capacity) {              \
     _VectorBase_Reserve((_VectorBase*)self, new_capacity);                                  \
     if (self->size){                                                                        \
         self->front = (T*)_VectorBase_Front((_VectorBase*)self);                            \
@@ -704,42 +704,42 @@ inline void _Vector_##T##_Reserve(Vector_##T* self, const umax new_capacity) {  
         self->back = NULL;                                                                  \
     }                                                                                       \
 }                                                                                           \
-inline void _Vector_##T##_Clear(Vector_##T* self) {                                         \
+INLINE void _Vector_##T##_Clear(Vector_##T* self) {                                         \
     _VectorBase_Clear((_VectorBase*)self);                                                  \
     self->front = NULL;                                                                     \
     self->back = NULL;                                                                      \
 }                                                                                           \
-inline T* _Vector_##T##_At(const Vector_##T* self, const umax index) {                      \
+INLINE T* _Vector_##T##_At(const Vector_##T* self, const umax index) {                      \
     return (T*)_VectorBase_At((const _VectorBase*)self, index);                             \
 }                                                                                           \
-inline T* _Vector_##T##_Front(const Vector_##T* self) {                                     \
+INLINE T* _Vector_##T##_Front(const Vector_##T* self) {                                     \
     return (T*)_VectorBase_Front((const _VectorBase*)self);                                 \
 }                                                                                           \
-inline T* _Vector_##T##_Back(const Vector_##T* self) {                                      \
+INLINE T* _Vector_##T##_Back(const Vector_##T* self) {                                      \
     return (T*)_VectorBase_Back((const _VectorBase*)self);                                  \
 }                                                                                           \
-inline Vector_##T##_Iterator _Vector_##T##_Begin(const Vector_##T* self) {                  \
+INLINE Vector_##T##_Iterator _Vector_##T##_Begin(const Vector_##T* self) {                  \
     Vector_##T##_Iterator it;                                                               \
     _Vector_##T##_Iterator##_Create(&it);                                                   \
     it.ptr = (T*)_VectorBase_Front((const _VectorBase*)self);                               \
     return it;                                                                              \
 }                                                                                           \
-inline Vector_##T##_Iterator _Vector_##T##_End(const Vector_##T* self) {                    \
+INLINE Vector_##T##_Iterator _Vector_##T##_End(const Vector_##T* self) {                    \
     Vector_##T##_Iterator it;                                                               \
     _Vector_##T##_Iterator##_Create(&it);                                                   \
     it.ptr = (T*)_VectorBase_Back((const _VectorBase*)self);                                \
     if (it.ptr) ++it.ptr; /* end iterator points to one past the last element */            \
     return it;                                                                              \
 }                                                                                           \
-inline T* _Vector_##T##_Data(const Vector_##T* self) {                                      \
+INLINE T* _Vector_##T##_Data(const Vector_##T* self) {                                      \
     return (T*)_VectorBase_Data((const _VectorBase*)self);                                  \
 }                                                                                           \
-inline void _Vector_##T##_PushBack(Vector_##T* self, T elem) {                              \
+INLINE void _Vector_##T##_PushBack(Vector_##T* self, T elem) {                              \
     _VectorBase_PushBack((_VectorBase*)self, &elem);                                        \
     self->front = (T*)_VectorBase_Front((_VectorBase*)self);                                \
     self->back = (T*)_VectorBase_Back((_VectorBase*)self);                                  \
 }                                                                                           \
-inline void _Vector_##T##_Erase(Vector_##T* self, const umax index) {                      \
+INLINE void _Vector_##T##_Erase(Vector_##T* self, const umax index) {                      \
     _VectorBase_Erase((_VectorBase*)self, index);                                           \
     if (self->size == 0) {                                                                  \
         self->front = NULL;                                                                 \
@@ -749,12 +749,12 @@ inline void _Vector_##T##_Erase(Vector_##T* self, const umax index) {           
         self->back = (T*)_VectorBase_Back((_VectorBase*)self);                              \
     }                                                                                       \
 }                                                                                           \
-inline void _Vector_##T##_Insert(Vector_##T* self, const umax index, T elem) {             \
+INLINE void _Vector_##T##_Insert(Vector_##T* self, const umax index, T elem) {             \
     _VectorBase_Insert((_VectorBase*)self, index, &elem);                                  \
     self->front = (T*)_VectorBase_Front((_VectorBase*)self);                                \
     self->back = (T*)_VectorBase_Back((_VectorBase*)self);                                  \
 }                                                                                           \
-inline void _Vector_##T##_ShrinkToFit(Vector_##T* self) {                                   \
+INLINE void _Vector_##T##_ShrinkToFit(Vector_##T* self) {                                   \
     _VectorBase_ShrinkToFit((_VectorBase*)self);                                            \
     if (self->size == 0) {                                                                  \
         self->front = NULL;                                                                 \
@@ -764,18 +764,18 @@ inline void _Vector_##T##_ShrinkToFit(Vector_##T* self) {                       
         self->back = (T*)_VectorBase_Back((_VectorBase*)self);                              \
     }                                                                                       \
 }                                                                                           \
-inline void _Vector_##T##_Swap(Vector_##T* self, Vector_##T* other) {                      \
+INLINE void _Vector_##T##_Swap(Vector_##T* self, Vector_##T* other) {                      \
     Vector_##T tmp = *self;                                                                 \
     *self = *other;                                                                         \
     *other = tmp;                                                                           \
 }                                                                                           \
-inline T* _Vector_##T##_EmplaceBack(Vector_##T* self) {                                      \
+INLINE T* _Vector_##T##_EmplaceBack(Vector_##T* self) {                                      \
     T* ptr = (T*)_VectorBase_EmplaceBack((_VectorBase*)self);                                \
     self->front = (T*)_VectorBase_Front((_VectorBase*)self);                                  \
     self->back = (T*)_VectorBase_Back((_VectorBase*)self);                                    \
     return ptr;                                                                               \
 }                                                                                            \
-inline void _Vector_##T##_SwapErase(Vector_##T* self, const umax index) {                    \
+INLINE void _Vector_##T##_SwapErase(Vector_##T* self, const umax index) {                    \
     _VectorBase_SwapErase((_VectorBase*)self, index);                                        \
     if (self->size == 0) {                                                                   \
         self->front = NULL;                                                                  \

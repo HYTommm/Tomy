@@ -213,7 +213,7 @@ const char* reset_style(void);
 
 int _fast_print(const char* format, ...);
 
-inline size_t read_from_color24(String* str, Color24 color)
+INLINE size_t read_from_color24(String* str, Color24 color)
 {
     String* temp = format("{}[R:{} G:{} B:{}]{}", set_fg_color(color), color.r, color.g, color.b, reset_style());
     const size_t len = temp->size;
@@ -222,7 +222,7 @@ inline size_t read_from_color24(String* str, Color24 color)
     return len;
 }
 
-inline size_t read_from_va_list(String* str, const int type, va_list* args_ptr)
+INLINE size_t read_from_va_list(String* str, const int type, va_list* args_ptr)
 {
     switch (type)
     {
@@ -334,7 +334,7 @@ inline size_t read_from_va_list(String* str, const int type, va_list* args_ptr)
     return 0;
 }
 
-inline int format_from_va_list(String* str, const char* fmt, const int count, va_list* args_ptr)
+INLINE int format_from_va_list(String* str, const char* fmt, const int count, va_list* args_ptr)
 {
     int arg_index = 0;
     const size_t fmt_len = strlen(fmt);
@@ -378,7 +378,7 @@ inline int format_from_va_list(String* str, const char* fmt, const int count, va
     return arg_index;
 }
 
-inline void parse_va_list(String* str, const char* sep, const int count, va_list args)
+INLINE void parse_va_list(String* str, const char* sep, const int count, va_list args)
 {
     const size_t sep_len = strlen(sep);
     for (int i = 0; i < count; i++)
@@ -405,7 +405,7 @@ inline void parse_va_list(String* str, const char* sep, const int count, va_list
     }
 }
 
-inline String* format_func(const char* fmt, const int count, ...)
+INLINE String* format_func(const char* fmt, const int count, ...)
 {
     String* str = New(String, STRING_CAPACITY);
     va_list args;
@@ -415,7 +415,7 @@ inline String* format_func(const char* fmt, const int count, ...)
     return str;
 }
 
-inline void print_func(const PrintConfig* config, int count, ...)
+INLINE void print_func(const PrintConfig* config, int count, ...)
 {
     const char* sep = SEPARATOR;
     const char* end = "";
@@ -459,7 +459,7 @@ inline void print_func(const PrintConfig* config, int count, ...)
     va_end(args);
 }
 
-inline void println_func(const PrintConfig* config, int count, ...)
+INLINE void println_func(const PrintConfig* config, int count, ...)
 {
     const char* sep = SEPARATOR;
     const char* end = END;
@@ -503,62 +503,62 @@ inline void println_func(const PrintConfig* config, int count, ...)
     va_end(args);
 }
 
-inline String* set_cursor_pos(const int x, const int y)
+INLINE String* set_cursor_pos(const int x, const int y)
 {
     return format("\033[{};{}H", y + 1, x + 1);
 }
 
-inline String* set_fg_idx(int idx)
+INLINE String* set_fg_idx(int idx)
 {
     return format("\033[38;5;{}m", idx);
 }
 
-inline String* set_fg_rgb(int r, int g, int b)
+INLINE String* set_fg_rgb(int r, int g, int b)
 {
     return format("\033[38;2;{};{};{}m", r, g, b);
 }
 
-inline String* set_fg_color(const Color24 color)
+INLINE String* set_fg_color(const Color24 color)
 {
     return set_fg_rgb(color.r, color.g, color.b);
 }
 
-inline String* set_bg_idx(int idx)
+INLINE String* set_bg_idx(int idx)
 {
     return format("\033[48;5;{}m", idx);
 }
 
-inline String* set_bg_rgb(int r, int g, int b)
+INLINE String* set_bg_rgb(int r, int g, int b)
 {
     return format("\033[48;2;{};{};{}m", r, g, b);
 }
 
-inline String* set_bg_color(const Color24 color)
+INLINE String* set_bg_color(const Color24 color)
 {
     return set_bg_rgb(color.r, color.g, color.b);
 }
 
-inline String* set_colors_idx(int fg_idx, int bg_idx)
+INLINE String* set_colors_idx(int fg_idx, int bg_idx)
 {
     return format("\033[38;5;{};48;5;{}m", fg_idx, bg_idx);
 }
 
-inline String* set_colors_rgb(int fg_r, int fg_g, int fg_b, int bg_r, int bg_g, int bg_b)
+INLINE String* set_colors_rgb(int fg_r, int fg_g, int fg_b, int bg_r, int bg_g, int bg_b)
 {
     return format("\033[38;2;{};{};{};48;2;{};{};{}m", fg_r, fg_g, fg_b, bg_r, bg_g, bg_b);
 }
 
-inline String* set_colors_color(const Color24 fg_color, const Color24 bg_color)
+INLINE String* set_colors_color(const Color24 fg_color, const Color24 bg_color)
 {
     return set_colors_rgb(fg_color.r, fg_color.g, fg_color.b, bg_color.r, bg_color.g, bg_color.b);
 }
 
-inline const char* reset_style(void)
+INLINE const char* reset_style(void)
 {
     return RESET_STYLE;
 }
 
-inline int _fast_print(const char* format, ...)
+INLINE int _fast_print(const char* format, ...)
 {
     va_list args;
     va_start(args, format);

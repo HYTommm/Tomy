@@ -190,7 +190,7 @@ static inline bool _HashMapBase_Rehash(_HashMapBase* self, umax new_capacity)
 
 /* ============ Public _HashMapBase Functions ============ */
 
-inline void _HashMapBase_Create(_HashMapBase* self,
+INLINE void _HashMapBase_Create(_HashMapBase* self,
     umax key_size, umax value_size,
     HashFunc hash, KeyEquals equals,
     ElemConstructor* kc, ElemDestructor* kd, ElemCopy* kcp,
@@ -216,7 +216,7 @@ inline void _HashMapBase_Create(_HashMapBase* self,
     self->value_copy = vcp;
 }
 
-inline void _HashMapBase_Destroy(_HashMapBase* self)
+INLINE void _HashMapBase_Destroy(_HashMapBase* self)
 {
     ERR_RET_NULL(self);
     for (umax i = 0; i < self->capacity; i++)
@@ -237,7 +237,7 @@ inline void _HashMapBase_Destroy(_HashMapBase* self)
     self->size = 0;
 }
 
-inline bool _HashMapBase_Insert(_HashMapBase* self, const void* key, const void* value)
+INLINE bool _HashMapBase_Insert(_HashMapBase* self, const void* key, const void* value)
 {
     ERR_RET_V_NULL(self, false);
     ERR_RET_V_NULL(key, false);
@@ -276,7 +276,7 @@ inline bool _HashMapBase_Insert(_HashMapBase* self, const void* key, const void*
     return true;
 }
 
-inline bool _HashMapBase_TryEmplace(_HashMapBase* self, const void* key, const void* value)
+INLINE bool _HashMapBase_TryEmplace(_HashMapBase* self, const void* key, const void* value)
 {
     ERR_RET_V_NULL(self, false);
     ERR_RET_V_NULL(key, false);
@@ -308,7 +308,7 @@ inline bool _HashMapBase_TryEmplace(_HashMapBase* self, const void* key, const v
     return true;
 }
 
-inline void* _HashMapBase_At(const _HashMapBase* self, const void* key)
+INLINE void* _HashMapBase_At(const _HashMapBase* self, const void* key)
 {
     ERR_RET_V_NULL(self, NULL);
     ERR_RET_V_NULL(key, NULL);
@@ -321,7 +321,7 @@ inline void* _HashMapBase_At(const _HashMapBase* self, const void* key)
     return self->values + idx * self->value_size;
 }
 
-inline bool _HashMapBase_Erase(_HashMapBase* self, const void* key)
+INLINE bool _HashMapBase_Erase(_HashMapBase* self, const void* key)
 {
     ERR_RET_V_NULL(self, false);
     ERR_RET_V_NULL(key, false);
@@ -349,7 +349,7 @@ inline bool _HashMapBase_Erase(_HashMapBase* self, const void* key)
     return true;
 }
 
-inline void _HashMapBase_Clear(_HashMapBase* self)
+INLINE void _HashMapBase_Clear(_HashMapBase* self)
 {
     ERR_RET_NULL(self);
     for (umax i = 0; i < self->capacity; i++)
@@ -365,7 +365,7 @@ inline void _HashMapBase_Clear(_HashMapBase* self)
     self->deleted = 0;
 }
 
-inline void _HashMapBase_ShrinkToFit(_HashMapBase* self)
+INLINE void _HashMapBase_ShrinkToFit(_HashMapBase* self)
 {
     ERR_RET_NULL(self);
     if (self->size == 0)
@@ -385,7 +385,7 @@ inline void _HashMapBase_ShrinkToFit(_HashMapBase* self)
     _HashMapBase_Rehash(self, min_cap);
 }
 
-inline bool _HashMapBase_Reserve(_HashMapBase* self, umax min_capacity)
+INLINE bool _HashMapBase_Reserve(_HashMapBase* self, umax min_capacity)
 {
     ERR_RET_V_NULL(self, false);
     if (min_capacity == 0) return true;
@@ -400,13 +400,13 @@ inline bool _HashMapBase_Reserve(_HashMapBase* self, umax min_capacity)
     return _HashMapBase_Rehash(self, needed);
 }
 
-inline umax _HashMapBase_Size(const _HashMapBase* self)
+INLINE umax _HashMapBase_Size(const _HashMapBase* self)
 {
     ERR_RET_V_NULL(self, 0);
     return self->size;
 }
 
-inline bool _HashMapBase_Contains(const _HashMapBase* self, const void* key)
+INLINE bool _HashMapBase_Contains(const _HashMapBase* self, const void* key)
 {
     ERR_RET_V_NULL(self, false);
     ERR_RET_V_NULL(key, false);
@@ -416,13 +416,13 @@ inline bool _HashMapBase_Contains(const _HashMapBase* self, const void* key)
     return found;
 }
 
-inline bool _HashMapBase_IsEmpty(const _HashMapBase* self)
+INLINE bool _HashMapBase_IsEmpty(const _HashMapBase* self)
 {
     ERR_RET_V_NULL(self, false);
     return self->size == 0;
 }
 
-inline umax _HashMapBase_Count(const _HashMapBase* self, const void* key)
+INLINE umax _HashMapBase_Count(const _HashMapBase* self, const void* key)
 {
     ERR_RET_V_NULL(self, 0);
     ERR_RET_V_NULL(key, 0);
@@ -432,14 +432,14 @@ inline umax _HashMapBase_Count(const _HashMapBase* self, const void* key)
     return found ? 1 : 0;
 }
 
-inline double _HashMapBase_LoadFactor(const _HashMapBase* self)
+INLINE double _HashMapBase_LoadFactor(const _HashMapBase* self)
 {
     ERR_RET_V_NULL(self, 0.0);
     if (self->capacity == 0) return 0.0;
     return (double)self->size / (double)self->capacity;
 }
 
-inline void _HashMapBase_Swap(_HashMapBase* restrict self, _HashMapBase* restrict other)
+INLINE void _HashMapBase_Swap(_HashMapBase* restrict self, _HashMapBase* restrict other)
 {
     ERR_RET_NULL(self);
     ERR_RET_NULL(other);
@@ -524,7 +524,7 @@ bool _HashMap_##K##_##V##_TryEmplace(HashMap_##K##_##V* self, const K* key, cons
                                                                                         \
 /* ===== Iterator Inline Definitions ===== */                                           \
                                                                                         \
-inline void _HashMap_##K##_##V##_Iterator##_Create(                                     \
+INLINE void _HashMap_##K##_##V##_Iterator##_Create(                                     \
     HashMap_##K##_##V##_Iterator* self)                                                 \
 {                                                                                       \
     static _HashMap_##K##_##V##_Iterator##_VTable vt = {                               \
@@ -546,13 +546,13 @@ inline void _HashMap_##K##_##V##_Iterator##_Create(                             
     self->index = 0;                                                                    \
 }                                                                                       \
                                                                                         \
-inline void _HashMap_##K##_##V##_Iterator##_Destroy(                                    \
+INLINE void _HashMap_##K##_##V##_Iterator##_Destroy(                                    \
     HashMap_##K##_##V##_Iterator* self)                                                 \
 {                                                                                       \
     _Object_Destroy((Object*)self);                                                     \
 }                                                                                       \
                                                                                         \
-inline HashMap_##K##_##V##_Iterator* _HashMap_##K##_##V##_Iterator##_New()              \
+INLINE HashMap_##K##_##V##_Iterator* _HashMap_##K##_##V##_Iterator##_New()              \
 {                                                                                       \
     HashMap_##K##_##V##_Iterator* self =                                                \
         (HashMap_##K##_##V##_Iterator*)malloc(sizeof(HashMap_##K##_##V##_Iterator));    \
@@ -561,14 +561,14 @@ inline HashMap_##K##_##V##_Iterator* _HashMap_##K##_##V##_Iterator##_New()      
     return self;                                                                        \
 }                                                                                       \
                                                                                         \
-inline void _HashMap_##K##_##V##_Iterator##_Delete(                                     \
+INLINE void _HashMap_##K##_##V##_Iterator##_Delete(                                     \
     HashMap_##K##_##V##_Iterator* self)                                                 \
 {                                                                                       \
     _HashMap_##K##_##V##_Iterator##_Destroy(self);                                      \
     free(self);                                                                         \
 }                                                                                       \
                                                                                         \
-inline String* _HashMap_##K##_##V##_Iterator##_ToString(                                \
+INLINE String* _HashMap_##K##_##V##_Iterator##_ToString(                                \
     HashMap_##K##_##V##_Iterator* self)                                                 \
 {                                                                                       \
     String* str = New(String, 32);                                                      \
@@ -576,7 +576,7 @@ inline String* _HashMap_##K##_##V##_Iterator##_ToString(                        
     return str;                                                                         \
 }                                                                                       \
                                                                                         \
-inline void* _HashMap_##K##_##V##_Iterator##_Raw(                                       \
+INLINE void* _HashMap_##K##_##V##_Iterator##_Raw(                                       \
     const HashMap_##K##_##V##_Iterator* self)                                           \
 {                                                                                       \
     if (!self->map) return NULL;                                                        \
@@ -586,7 +586,7 @@ inline void* _HashMap_##K##_##V##_Iterator##_Raw(                               
     return base->values + self->index * base->value_size;                               \
 }                                                                                       \
                                                                                         \
-inline HashMap_##K##_##V##_Pair _HashMap_##K##_##V##_Iterator##_Get(                     \
+INLINE HashMap_##K##_##V##_Pair _HashMap_##K##_##V##_Iterator##_Get(                     \
     const HashMap_##K##_##V##_Iterator* self)                                           \
 {                                                                                       \
     HashMap_##K##_##V##_Pair pair = { NULL, NULL };                                    \
@@ -595,7 +595,7 @@ inline HashMap_##K##_##V##_Pair _HashMap_##K##_##V##_Iterator##_Get(            
     return pair;                                                                        \
 }                                                                                       \
                                                                                         \
-inline K* _HashMap_##K##_##V##_Iterator##_Key(                                          \
+INLINE K* _HashMap_##K##_##V##_Iterator##_Key(                                          \
     const HashMap_##K##_##V##_Iterator* self)                                           \
 {                                                                                       \
     if (!self->map) return NULL;                                                        \
@@ -605,13 +605,13 @@ inline K* _HashMap_##K##_##V##_Iterator##_Key(                                  
     return (K*)(base->keys + self->index * base->key_size);                             \
 }                                                                                       \
                                                                                         \
-inline V* _HashMap_##K##_##V##_Iterator##_Value(                                        \
+INLINE V* _HashMap_##K##_##V##_Iterator##_Value(                                        \
     const HashMap_##K##_##V##_Iterator* self)                                           \
 {                                                                                       \
     return (V*)_HashMap_##K##_##V##_Iterator##_Raw(self);                               \
 }                                                                                       \
                                                                                         \
-inline void _HashMap_##K##_##V##_Iterator##_Next(                                       \
+INLINE void _HashMap_##K##_##V##_Iterator##_Next(                                       \
     HashMap_##K##_##V##_Iterator* self)                                                 \
 {                                                                                       \
     if (!self->map) return;                                                             \
@@ -621,7 +621,7 @@ inline void _HashMap_##K##_##V##_Iterator##_Next(                               
     }                                                                                   \
 }                                                                                       \
                                                                                         \
-inline bool _HashMap_##K##_##V##_Iterator##_Equals(                                     \
+INLINE bool _HashMap_##K##_##V##_Iterator##_Equals(                                     \
     const HashMap_##K##_##V##_Iterator* self,                                           \
     const HashMap_##K##_##V##_Iterator* other)                                          \
 {                                                                                       \
@@ -630,7 +630,7 @@ inline bool _HashMap_##K##_##V##_Iterator##_Equals(                             
                                                                                         \
 /* ===== HashMap Inline Definitions ===== */                                            \
                                                                                         \
-inline void _HashMap_##K##_##V##_Create(HashMap_##K##_##V* self) {                      \
+INLINE void _HashMap_##K##_##V##_Create(HashMap_##K##_##V* self) {                      \
     static _HashMap_##K##_##V##_VTable vt = {                                           \
         _HashMap_##K##_##V##_Create,                                                    \
         _HashMap_##K##_##V##_Destroy,                                                   \
@@ -645,23 +645,23 @@ inline void _HashMap_##K##_##V##_Create(HashMap_##K##_##V* self) {              
     self->vptr = (void*)&vt;                                                            \
 }                                                                                       \
                                                                                         \
-inline void _HashMap_##K##_##V##_Destroy(HashMap_##K##_##V* self) {                     \
+INLINE void _HashMap_##K##_##V##_Destroy(HashMap_##K##_##V* self) {                     \
     _HashMapBase_Destroy((_HashMapBase*)self);                                          \
 }                                                                                       \
                                                                                         \
-inline HashMap_##K##_##V* _HashMap_##K##_##V##_New() {                                  \
+INLINE HashMap_##K##_##V* _HashMap_##K##_##V##_New() {                                  \
     HashMap_##K##_##V* self = (HashMap_##K##_##V*)malloc(sizeof(HashMap_##K##_##V));    \
     ERR_RET_V_NULL(self, NULL);                                                         \
     _HashMap_##K##_##V##_Create(self);                                                  \
     return self;                                                                        \
 }                                                                                       \
                                                                                         \
-inline void _HashMap_##K##_##V##_Delete(HashMap_##K##_##V* self) {                      \
+INLINE void _HashMap_##K##_##V##_Delete(HashMap_##K##_##V* self) {                      \
     _HashMap_##K##_##V##_Destroy(self);                                                 \
     free(self);                                                                         \
 }                                                                                       \
                                                                                         \
-inline String* _HashMap_##K##_##V##_ToString(HashMap_##K##_##V* self) {                 \
+INLINE String* _HashMap_##K##_##V##_ToString(HashMap_##K##_##V* self) {                 \
     String* str = New(String, 32);                                                      \
     Call(String, str, Append, "HashMap<");                                              \
     Call(String, str, Append, #K);                                                      \
@@ -671,15 +671,15 @@ inline String* _HashMap_##K##_##V##_ToString(HashMap_##K##_##V* self) {         
     return str;                                                                         \
 }                                                                                       \
                                                                                         \
-inline bool _HashMap_##K##_##V##_Insert(HashMap_##K##_##V* self, K key, V value) {      \
+INLINE bool _HashMap_##K##_##V##_Insert(HashMap_##K##_##V* self, K key, V value) {      \
     return _HashMapBase_Insert((_HashMapBase*)self, &key, &value);                      \
 }                                                                                       \
                                                                                         \
-inline V* _HashMap_##K##_##V##_At(const HashMap_##K##_##V* self, K key) {                 \
+INLINE V* _HashMap_##K##_##V##_At(const HashMap_##K##_##V* self, K key) {                 \
     return (V*)_HashMapBase_At((const _HashMapBase*)self, &key);                       \
 }                                                                                       \
                                                                                         \
-inline HashMap_##K##_##V##_Iterator _HashMap_##K##_##V##_Find(                          \
+INLINE HashMap_##K##_##V##_Iterator _HashMap_##K##_##V##_Find(                          \
     const HashMap_##K##_##V* self, K key) {                                             \
     HashMap_##K##_##V##_Iterator it;                                                    \
     _HashMap_##K##_##V##_Iterator##_Create(&it);                                        \
@@ -695,41 +695,41 @@ inline HashMap_##K##_##V##_Iterator _HashMap_##K##_##V##_Find(                  
     return it;                                                                          \
 }                                                                                       \
                                                                                         \
-inline umax _HashMap_##K##_##V##_Count(const HashMap_##K##_##V* self, K key) {          \
+INLINE umax _HashMap_##K##_##V##_Count(const HashMap_##K##_##V* self, K key) {          \
     return _HashMapBase_Count((const _HashMapBase*)self, &key);                        \
 }                                                                                       \
                                                                                         \
-inline void _HashMap_##K##_##V##_Rehash(HashMap_##K##_##V* self, umax n) {              \
+INLINE void _HashMap_##K##_##V##_Rehash(HashMap_##K##_##V* self, umax n) {              \
     umax target = _umax_next_pow2(n < _HASHMAP_MIN_CAPACITY                            \
         ? _HASHMAP_MIN_CAPACITY : n);                                                   \
     _HashMapBase_Rehash((_HashMapBase*)self, target);                                   \
 }                                                                                       \
                                                                                         \
-inline bool _HashMap_##K##_##V##_Erase(HashMap_##K##_##V* self, K key) {                \
+INLINE bool _HashMap_##K##_##V##_Erase(HashMap_##K##_##V* self, K key) {                \
     return _HashMapBase_Erase((_HashMapBase*)self, &key);                              \
 }                                                                                       \
                                                                                         \
-inline bool _HashMap_##K##_##V##_Contains(const HashMap_##K##_##V* self, K key) {       \
+INLINE bool _HashMap_##K##_##V##_Contains(const HashMap_##K##_##V* self, K key) {       \
     return _HashMapBase_Contains((const _HashMapBase*)self, &key);                      \
 }                                                                                       \
                                                                                         \
-inline umax _HashMap_##K##_##V##_Size(const HashMap_##K##_##V* self) {                  \
+INLINE umax _HashMap_##K##_##V##_Size(const HashMap_##K##_##V* self) {                  \
     return _HashMapBase_Size((const _HashMapBase*)self);                                \
 }                                                                                       \
                                                                                         \
-inline void _HashMap_##K##_##V##_Clear(HashMap_##K##_##V* self) {                       \
+INLINE void _HashMap_##K##_##V##_Clear(HashMap_##K##_##V* self) {                       \
     _HashMapBase_Clear((_HashMapBase*)self);                                            \
 }                                                                                       \
                                                                                         \
-inline void _HashMap_##K##_##V##_ShrinkToFit(HashMap_##K##_##V* self) {                 \
+INLINE void _HashMap_##K##_##V##_ShrinkToFit(HashMap_##K##_##V* self) {                 \
     _HashMapBase_ShrinkToFit((_HashMapBase*)self);                                      \
 }                                                                                       \
                                                                                         \
-inline bool _HashMap_##K##_##V##_Reserve(HashMap_##K##_##V* self, umax min_capacity) {  \
+INLINE bool _HashMap_##K##_##V##_Reserve(HashMap_##K##_##V* self, umax min_capacity) {  \
     return _HashMapBase_Reserve((_HashMapBase*)self, min_capacity);                     \
 }                                                                                       \
                                                                                         \
-inline HashMap_##K##_##V##_Iterator _HashMap_##K##_##V##_Begin(                         \
+INLINE HashMap_##K##_##V##_Iterator _HashMap_##K##_##V##_Begin(                         \
     const HashMap_##K##_##V* self)                                                      \
 {                                                                                       \
     HashMap_##K##_##V##_Iterator it;                                                    \
@@ -742,7 +742,7 @@ inline HashMap_##K##_##V##_Iterator _HashMap_##K##_##V##_Begin(                 
     return it;                                                                          \
 }                                                                                       \
                                                                                         \
-inline HashMap_##K##_##V##_Iterator _HashMap_##K##_##V##_End(                           \
+INLINE HashMap_##K##_##V##_Iterator _HashMap_##K##_##V##_End(                           \
     const HashMap_##K##_##V* self)                                                      \
 {                                                                                       \
     HashMap_##K##_##V##_Iterator it;                                                    \
@@ -752,20 +752,20 @@ inline HashMap_##K##_##V##_Iterator _HashMap_##K##_##V##_End(                   
     return it;                                                                          \
 }                                                                                       \
                                                                                         \
-inline bool _HashMap_##K##_##V##_IsEmpty(const HashMap_##K##_##V* self) {               \
+INLINE bool _HashMap_##K##_##V##_IsEmpty(const HashMap_##K##_##V* self) {               \
     return _HashMapBase_IsEmpty((const _HashMapBase*)self);                             \
 }                                                                                       \
                                                                                         \
-inline double _HashMap_##K##_##V##_LoadFactor(const HashMap_##K##_##V* self) {          \
+INLINE double _HashMap_##K##_##V##_LoadFactor(const HashMap_##K##_##V* self) {          \
     return _HashMapBase_LoadFactor((const _HashMapBase*)self);                          \
 }                                                                                       \
                                                                                         \
-inline void _HashMap_##K##_##V##_Swap(HashMap_##K##_##V* self,                          \
+INLINE void _HashMap_##K##_##V##_Swap(HashMap_##K##_##V* self,                          \
     HashMap_##K##_##V* other) {                                                         \
     _HashMapBase_Swap((_HashMapBase*)self, (_HashMapBase*)other);                        \
 }                                                                                       \
                                                                                         \
-inline bool _HashMap_##K##_##V##_TryEmplace(HashMap_##K##_##V* self,                    \
+INLINE bool _HashMap_##K##_##V##_TryEmplace(HashMap_##K##_##V* self,                    \
     const K* key, const V* value) {                                                     \
     return _HashMapBase_TryEmplace((_HashMapBase*)self, key, value);                    \
 }

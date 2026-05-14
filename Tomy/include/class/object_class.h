@@ -24,7 +24,7 @@ Object* Object_New();
 void _Object_Delete(Object* self);
 String* _Object_ToString(Object* self);
 
-inline void Object_Create(Object* self)
+INLINE void Object_Create(Object* self)
 {
     static _Object_VTable Object_VTable_Instance = {
         Object_Create,
@@ -35,18 +35,18 @@ inline void Object_Create(Object* self)
     };
     self->vptr = &Object_VTable_Instance;
 }
-inline void _Object_Destroy(Object* self)
+INLINE void _Object_Destroy(Object* self)
 {
     self->vptr = NULL;
 }
-inline Object* Object_New()
+INLINE Object* Object_New()
 {
     Object* self = (Object*)malloc(sizeof(Object));
     ERR_RET_V_COND(self == NULL, NULL);
     Object_Create(self);
     return self;
 }
-inline void _Object_Delete(Object* self)
+INLINE void _Object_Delete(Object* self)
 {
     _Object_Destroy(self);
     free(self);

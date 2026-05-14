@@ -40,7 +40,7 @@ CLASS{
 
 /* ============ _ListBase Implementation ============ */
 
-inline void _ListBase_Create(_ListBase* self,
+INLINE void _ListBase_Create(_ListBase* self,
     umax elem_size,
     ElemConstructor* construct, ElemDestructor* destroy, ElemCopy* copy, CmpFunc cmp)
 {
@@ -56,7 +56,7 @@ inline void _ListBase_Create(_ListBase* self,
     self->cmp = cmp;
 }
 
-inline void _ListBase_Destroy(_ListBase* self)
+INLINE void _ListBase_Destroy(_ListBase* self)
 {
     ERR_RET_NULL(self);
     _ListNode* curr = self->head.next;
@@ -72,7 +72,7 @@ inline void _ListBase_Destroy(_ListBase* self)
     self->size = 0;
 }
 
-inline _ListBase* _ListBase_New(umax elem_size,
+INLINE _ListBase* _ListBase_New(umax elem_size,
     ElemConstructor* construct, ElemDestructor* destroy, ElemCopy* copy, CmpFunc cmp)
 {
     _ListBase* self = (_ListBase*)malloc(sizeof(_ListBase));
@@ -81,7 +81,7 @@ inline _ListBase* _ListBase_New(umax elem_size,
     return self;
 }
 
-inline void _ListBase_Delete(_ListBase* self)
+INLINE void _ListBase_Delete(_ListBase* self)
 {
     ERR_RET_NULL(self);
     _ListBase_Destroy(self);
@@ -90,7 +90,7 @@ inline void _ListBase_Delete(_ListBase* self)
 
 /* ---- Mutators ---- */
 
-inline void _ListBase_PushFront(_ListBase* self, const void* elem)
+INLINE void _ListBase_PushFront(_ListBase* self, const void* elem)
 {
     ERR_RET_NULL(self);
     ERR_RET_NULL(elem);
@@ -108,7 +108,7 @@ inline void _ListBase_PushFront(_ListBase* self, const void* elem)
     self->size++;
 }
 
-inline void _ListBase_PopFront(_ListBase* self)
+INLINE void _ListBase_PopFront(_ListBase* self)
 {
     ERR_RET_NULL(self);
     if (self->size == 0) return;
@@ -123,7 +123,7 @@ inline void _ListBase_PopFront(_ListBase* self)
     self->size--;
 }
 
-inline void _ListBase_PushBack(_ListBase* self, const void* elem)
+INLINE void _ListBase_PushBack(_ListBase* self, const void* elem)
 {
     ERR_RET_NULL(self);
     ERR_RET_NULL(elem);
@@ -143,21 +143,21 @@ inline void _ListBase_PushBack(_ListBase* self, const void* elem)
 
 /* ---- Accessors ---- */
 
-inline void* _ListBase_Front(const _ListBase* self)
+INLINE void* _ListBase_Front(const _ListBase* self)
 {
     ERR_RET_V_NULL(self, NULL);
     if (self->size == 0) return NULL;
     return _List_Data(self->head.next);
 }
 
-inline void* _ListBase_Back(const _ListBase* self)
+INLINE void* _ListBase_Back(const _ListBase* self)
 {
     ERR_RET_V_NULL(self, NULL);
     if (self->size == 0) return NULL;
     return _List_Data(self->tail);
 }
 
-inline void _ListBase_InsertAfter(_ListBase* self, _ListNode* pos, const void* elem)
+INLINE void _ListBase_InsertAfter(_ListBase* self, _ListNode* pos, const void* elem)
 {
     if (!pos) return;
     _ListNode* node = _List_NewNode(self->elem_size);
@@ -174,7 +174,7 @@ inline void _ListBase_InsertAfter(_ListBase* self, _ListNode* pos, const void* e
     self->size++;
 }
 
-inline void _ListBase_EraseAfter(_ListBase* self, _ListNode* pos)
+INLINE void _ListBase_EraseAfter(_ListBase* self, _ListNode* pos)
 {
     ERR_RET_NULL(self);
     if (!pos || !pos->next) return;
@@ -189,7 +189,7 @@ inline void _ListBase_EraseAfter(_ListBase* self, _ListNode* pos)
     self->size--;
 }
 
-inline void _ListBase_Clear(_ListBase* self)
+INLINE void _ListBase_Clear(_ListBase* self)
 {
     ERR_RET_NULL(self);
     _ListNode* curr = self->head.next;
@@ -205,19 +205,19 @@ inline void _ListBase_Clear(_ListBase* self)
     self->size = 0;
 }
 
-inline bool _ListBase_IsEmpty(const _ListBase* self)
+INLINE bool _ListBase_IsEmpty(const _ListBase* self)
 {
     ERR_RET_V_NULL(self, false);
     return self->size == 0;
 }
 
-inline umax _ListBase_Size(const _ListBase* self)
+INLINE umax _ListBase_Size(const _ListBase* self)
 {
     ERR_RET_V_NULL(self, 0);
     return self->size;
 }
 
-inline void _ListBase_Reverse(_ListBase* self)
+INLINE void _ListBase_Reverse(_ListBase* self)
 {
     ERR_RET_NULL(self);
     _ListNode* prev = NULL;
@@ -306,7 +306,7 @@ inline void _ListBase_Reverse(_ListBase* self)
     List_##T##_Iterator _List_##T##_BeforeBegin(const List_##T* self);                         \
                                                                                                 \
     /* ===== Iterator Inline Definitions ===== */                                               \
-    inline void _List_##T##_Iterator##_Create(List_##T##_Iterator* self)                        \
+    INLINE void _List_##T##_Iterator##_Create(List_##T##_Iterator* self)                        \
     {                                                                                           \
         static _List_##T##_Iterator##_VTable vt = {                                            \
             _List_##T##_Iterator##_Create,                                                     \
@@ -324,12 +324,12 @@ inline void _ListBase_Reverse(_ListBase* self)
         self->node = NULL;                                                                      \
     }                                                                                           \
                                                                                                 \
-    inline void _List_##T##_Iterator##_Destroy(List_##T##_Iterator* self)                       \
+    INLINE void _List_##T##_Iterator##_Destroy(List_##T##_Iterator* self)                       \
     {                                                                                           \
         _Object_Destroy((Object*)self);                                                         \
     }                                                                                           \
                                                                                                 \
-    inline List_##T##_Iterator* _List_##T##_Iterator##_New()                                    \
+    INLINE List_##T##_Iterator* _List_##T##_Iterator##_New()                                    \
     {                                                                                           \
         List_##T##_Iterator* self =                                                             \
             (List_##T##_Iterator*)malloc(sizeof(List_##T##_Iterator));                          \
@@ -338,37 +338,37 @@ inline void _ListBase_Reverse(_ListBase* self)
         return self;                                                                            \
     }                                                                                           \
                                                                                                 \
-    inline void _List_##T##_Iterator##_Delete(List_##T##_Iterator* self)                        \
+    INLINE void _List_##T##_Iterator##_Delete(List_##T##_Iterator* self)                        \
     {                                                                                           \
         _List_##T##_Iterator##_Destroy(self);                                                   \
         free(self);                                                                             \
     }                                                                                           \
                                                                                                 \
-    inline String* _List_##T##_Iterator##_ToString(List_##T##_Iterator* self)                   \
+    INLINE String* _List_##T##_Iterator##_ToString(List_##T##_Iterator* self)                   \
     {                                                                                           \
         String* str = New(String, STRING_CAPACITY);                                             \
         Call(String, str, Append, "ListIterator");                                              \
         return str;                                                                             \
     }                                                                                           \
                                                                                                 \
-    inline void* _List_##T##_Iterator##_Raw(const List_##T##_Iterator* self)                    \
+    INLINE void* _List_##T##_Iterator##_Raw(const List_##T##_Iterator* self)                    \
     {                                                                                           \
         if (!self->node) return NULL;                                                           \
         return _List_Data(self->node);                                                          \
     }                                                                                           \
                                                                                                 \
-    inline T _List_##T##_Iterator##_Get(const List_##T##_Iterator* self)                        \
+    INLINE T _List_##T##_Iterator##_Get(const List_##T##_Iterator* self)                        \
     {                                                                                           \
         if (!self->node) return (T){0};                                                        \
         return *(T*)_List_Data(self->node);                                                     \
     }                                                                                           \
                                                                                                 \
-    inline void _List_##T##_Iterator##_Next(List_##T##_Iterator* self)                          \
+    INLINE void _List_##T##_Iterator##_Next(List_##T##_Iterator* self)                          \
     {                                                                                           \
         if (self->node) self->node = self->node->next;                                          \
     }                                                                                           \
                                                                                                 \
-    inline bool _List_##T##_Iterator##_Equals(                                                  \
+    INLINE bool _List_##T##_Iterator##_Equals(                                                  \
         const List_##T##_Iterator* self,                                                        \
         const List_##T##_Iterator* other)                                                       \
     {                                                                                           \
@@ -376,7 +376,7 @@ inline void _ListBase_Reverse(_ListBase* self)
     }                                                                                           \
                                                                                                 \
     /* ===== List Inline Definitions ===== */                                                   \
-    inline void _List_##T##_Create(List_##T* self)                                              \
+    INLINE void _List_##T##_Create(List_##T* self)                                              \
     {                                                                                           \
         static _List_##T##_VTable vt = {                                                       \
             _List_##T##_Create,                                                                 \
@@ -403,12 +403,12 @@ inline void _ListBase_Reverse(_ListBase* self)
         self->vptr = (void*)&vt;                                                                \
     }                                                                                           \
                                                                                                 \
-    inline void _List_##T##_Destroy(List_##T* self)                                             \
+    INLINE void _List_##T##_Destroy(List_##T* self)                                             \
     {                                                                                           \
         _ListBase_Destroy((_ListBase*)self);                                                    \
     }                                                                                           \
                                                                                                 \
-    inline List_##T* _List_##T##_New()                                                          \
+    INLINE List_##T* _List_##T##_New()                                                          \
     {                                                                                           \
         List_##T* self = (List_##T*)malloc(sizeof(List_##T));                                   \
         ERR_RET_V_NULL(self, NULL);                                                             \
@@ -416,13 +416,13 @@ inline void _ListBase_Reverse(_ListBase* self)
         return self;                                                                            \
     }                                                                                           \
                                                                                                 \
-    inline void _List_##T##_Delete(List_##T* self)                                              \
+    INLINE void _List_##T##_Delete(List_##T* self)                                              \
     {                                                                                           \
         _List_##T##_Destroy(self);                                                              \
         free(self);                                                                             \
     }                                                                                           \
                                                                                                 \
-    inline String* _List_##T##_ToString(List_##T* self)                                         \
+    INLINE String* _List_##T##_ToString(List_##T* self)                                         \
     {                                                                                           \
         String* str = New(String, STRING_CAPACITY);                                             \
         Call(String, str, Append, "List<");                                                     \
@@ -431,64 +431,64 @@ inline void _ListBase_Reverse(_ListBase* self)
         return str;                                                                             \
     }                                                                                           \
                                                                                                 \
-    inline void _List_##T##_PushFront(List_##T* self, T val)                                    \
+    INLINE void _List_##T##_PushFront(List_##T* self, T val)                                    \
     {                                                                                           \
         _ListBase_PushFront((_ListBase*)self, &val);                                            \
     }                                                                                           \
                                                                                                 \
-    inline void _List_##T##_PopFront(List_##T* self)                                            \
+    INLINE void _List_##T##_PopFront(List_##T* self)                                            \
     {                                                                                           \
         _ListBase_PopFront((_ListBase*)self);                                                   \
     }                                                                                           \
                                                                                                 \
-    inline void _List_##T##_PushBack(List_##T* self, T val)                                     \
+    INLINE void _List_##T##_PushBack(List_##T* self, T val)                                     \
     {                                                                                           \
         _ListBase_PushBack((_ListBase*)self, &val);                                             \
     }                                                                                           \
                                                                                                 \
-    inline T* _List_##T##_Front(const List_##T* self)                                           \
+    INLINE T* _List_##T##_Front(const List_##T* self)                                           \
     {                                                                                           \
         return (T*)_ListBase_Front((const _ListBase*)self);                                     \
     }                                                                                           \
                                                                                                 \
-    inline T* _List_##T##_Back(const List_##T* self)                                            \
+    INLINE T* _List_##T##_Back(const List_##T* self)                                            \
     {                                                                                           \
         return (T*)_ListBase_Back((const _ListBase*)self);                                      \
     }                                                                                           \
                                                                                                 \
-    inline void _List_##T##_InsertAfter(List_##T* self,                                         \
+    INLINE void _List_##T##_InsertAfter(List_##T* self,                                         \
         List_##T##_Iterator pos, T val)                                                         \
     {                                                                                           \
         _ListBase_InsertAfter((_ListBase*)self, pos.node, &val);                                \
     }                                                                                           \
                                                                                                 \
-    inline void _List_##T##_EraseAfter(List_##T* self,                                          \
+    INLINE void _List_##T##_EraseAfter(List_##T* self,                                          \
         List_##T##_Iterator pos)                                                                \
     {                                                                                           \
         _ListBase_EraseAfter((_ListBase*)self, pos.node);                                       \
     }                                                                                           \
                                                                                                 \
-    inline void _List_##T##_Clear(List_##T* self)                                               \
+    INLINE void _List_##T##_Clear(List_##T* self)                                               \
     {                                                                                           \
         _ListBase_Clear((_ListBase*)self);                                                      \
     }                                                                                           \
                                                                                                 \
-    inline bool _List_##T##_IsEmpty(const List_##T* self)                                       \
+    INLINE bool _List_##T##_IsEmpty(const List_##T* self)                                       \
     {                                                                                           \
         return _ListBase_IsEmpty((const _ListBase*)self);                                       \
     }                                                                                           \
                                                                                                 \
-    inline umax _List_##T##_Size(const List_##T* self)                                          \
+    INLINE umax _List_##T##_Size(const List_##T* self)                                          \
     {                                                                                           \
         return _ListBase_Size((const _ListBase*)self);                                          \
     }                                                                                           \
                                                                                                 \
-    inline void _List_##T##_Reverse(List_##T* self)                                             \
+    INLINE void _List_##T##_Reverse(List_##T* self)                                             \
     {                                                                                           \
         _ListBase_Reverse((_ListBase*)self);                                                    \
     }                                                                                           \
                                                                                                 \
-    inline List_##T##_Iterator _List_##T##_Begin(const List_##T* self)                          \
+    INLINE List_##T##_Iterator _List_##T##_Begin(const List_##T* self)                          \
     {                                                                                           \
         List_##T##_Iterator it;                                                                 \
         _List_##T##_Iterator##_Create(&it);                                                     \
@@ -496,7 +496,7 @@ inline void _ListBase_Reverse(_ListBase* self)
         return it;                                                                              \
     }                                                                                           \
                                                                                                 \
-    inline List_##T##_Iterator _List_##T##_End(const List_##T* self)                            \
+    INLINE List_##T##_Iterator _List_##T##_End(const List_##T* self)                            \
     {                                                                                           \
         List_##T##_Iterator it;                                                                 \
         _List_##T##_Iterator##_Create(&it);                                                     \
@@ -504,14 +504,14 @@ inline void _ListBase_Reverse(_ListBase* self)
         return it;                                                                              \
     }                                                                                           \
                                                                                                 \
-    inline List_##T##_Iterator _List_##T##_BeforeBegin(const List_##T* self)                    \
+    INLINE List_##T##_Iterator _List_##T##_BeforeBegin(const List_##T* self)                    \
     {                                                                                           \
         List_##T##_Iterator it;                                                                 \
         _List_##T##_Iterator##_Create(&it);                                                     \
         it.node = &((_ListBase*)self)->head;                                                    \
         return it;                                                                              \
     }                                                                                           \
-    inline _ListNode* _List_##T##_Merge(_ListNode* a, _ListNode* b, int (*cmp)(const T*, const T*)) {   \
+    INLINE _ListNode* _List_##T##_Merge(_ListNode* a, _ListNode* b, int (*cmp)(const T*, const T*)) {   \
         _ListNode dummy = { NULL };                                                                    \
         _ListNode* tail = &dummy;                                                                      \
         while (a && b) {                                                                               \
@@ -525,7 +525,7 @@ inline void _ListBase_Reverse(_ListBase* self)
         tail->next = a ? a : b;                                                                        \
         return dummy.next;                                                                             \
     }                                                                                                  \
-    inline _ListNode* _List_##T##_MergeSort(_ListNode* head, int (*cmp)(const T*, const T*)) {         \
+    INLINE _ListNode* _List_##T##_MergeSort(_ListNode* head, int (*cmp)(const T*, const T*)) {         \
         if (!head || !head->next) return head;                                                         \
         _ListNode* slow = head;                                                                        \
         _ListNode* fast = head->next;                                                                  \
@@ -539,7 +539,7 @@ inline void _ListBase_Reverse(_ListBase* self)
         _ListNode* right = _List_##T##_MergeSort(mid, cmp);                                            \
         return _List_##T##_Merge(left, right, cmp);                                                    \
     }                                                                                                  \
-    inline void _List_##T##_Sort(List_##T* self, int (*cmp)(const T*, const T*)) {                     \
+    INLINE void _List_##T##_Sort(List_##T* self, int (*cmp)(const T*, const T*)) {                     \
         ERR_RET_NULL(self);                                                                            \
         if (self->size <= 1) return;                                                                   \
         if (!cmp) cmp = (int (*)(const T*, const T*))self->cmp;                                        \
@@ -550,7 +550,7 @@ inline void _ListBase_Reverse(_ListBase* self)
         while (cur && cur->next) cur = cur->next;                                                      \
         self->tail = cur ? cur : &self->head;                                                          \
     }                                                                                                  \
-    inline T* _List_##T##_Find(List_##T* self, T value) {                                              \
+    INLINE T* _List_##T##_Find(List_##T* self, T value) {                                              \
         ERR_RET_V_NULL(self, NULL);                                                                    \
         if (!self->cmp || self->size == 0) return NULL;                                                \
         _ListNode* curr = self->head.next;                                                             \
@@ -561,7 +561,7 @@ inline void _ListBase_Reverse(_ListBase* self)
         }                                                                                              \
         return NULL;                                                                                   \
     }                                                                                                  \
-    inline T* _List_##T##_FindIf(List_##T* self, bool (*pred)(const T*)) {                             \
+    INLINE T* _List_##T##_FindIf(List_##T* self, bool (*pred)(const T*)) {                             \
         ERR_RET_V_NULL(self, NULL);                                                                    \
         ERR_RET_V_NULL(pred, NULL);                                                                    \
         _ListNode* curr = self->head.next;                                                             \
@@ -572,7 +572,7 @@ inline void _ListBase_Reverse(_ListBase* self)
         }                                                                                              \
         return NULL;                                                                                   \
     }                                                                                                  \
-    inline umax _List_##T##_Count(List_##T* self, T value) {                                           \
+    INLINE umax _List_##T##_Count(List_##T* self, T value) {                                           \
         ERR_RET_V_NULL(self, 0);                                                                       \
         if (!self->cmp || self->size == 0) return 0;                                                   \
         _ListNode* curr = self->head.next;                                                             \

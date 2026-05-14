@@ -3,7 +3,7 @@
 
 int _fast_print(const char* format, ...);
 
-inline void _err_print(const char* func, const char* file, const int line, const char* error, const char* message)
+INLINE void _err_print(const char* func, const char* file, const int line, const char* error, const char* message)
 {
     const char* err_msg = (message && *message) ? message : error;
 

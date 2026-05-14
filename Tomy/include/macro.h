@@ -206,6 +206,16 @@ enum
 #endif
 #endif
 
+// General-purpose inline: uses static inline on GCC/Clang to avoid multiple-definition
+// issues at -O0; uses plain inline on MSVC where it's handled correctly.
+#ifndef INLINE
+#ifdef _MSC_VER
+#define INLINE inline
+#else
+#define INLINE static inline
+#endif
+#endif
+
 // In some cases [[nodiscard]] will get false positives,
 // we can prevent the warning in specific cases by preceding the call with a cast.
 #ifndef _ALLOW_DISCARD_
@@ -255,25 +265,25 @@ enum
 #define MIN_SAFE MIN_GNUC
 
 #else
-inline long long _min_ll_ll(const long long a, const long long b)
+INLINE long long _min_ll_ll(const long long a, const long long b)
 {
     return a < b ? a : b;
 }
-inline long long _min_ll_ull(const long long a, const unsigned long long b)
+INLINE long long _min_ll_ull(const long long a, const unsigned long long b)
 {
     if (a < 0) return a;
     return (unsigned long long)a < b ? a : (long long)b;
 }
-inline long long _min_ull_ll(const unsigned long long a, const long long b)
+INLINE long long _min_ull_ll(const unsigned long long a, const long long b)
 {
     if (b < 0) return b;
     return a < (unsigned long long)b ? (long long)a : b;
 }
-inline unsigned long long _min_ull_ull(const unsigned long long a, const unsigned long long b)
+INLINE unsigned long long _min_ull_ull(const unsigned long long a, const unsigned long long b)
 {
     return a < b ? a : b;
 }
-inline double _min_double(const double a, const double b)
+INLINE double _min_double(const double a, const double b)
 {
     return a < b ? a : b;
 }

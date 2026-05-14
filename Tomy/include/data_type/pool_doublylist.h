@@ -194,7 +194,7 @@ static inline void _PoolDoublyListBase_Compact(_PoolDoublyListBase* self)
 
 /* ============ _PoolDoublyListBase Implementation ============ */
 
-inline void _PoolDoublyListBase_Create(_PoolDoublyListBase* self,
+INLINE void _PoolDoublyListBase_Create(_PoolDoublyListBase* self,
     umax elem_size,
     ElemConstructor* construct, ElemDestructor* destroy, ElemCopy* copy, CmpFunc cmp)
 {
@@ -214,7 +214,7 @@ inline void _PoolDoublyListBase_Create(_PoolDoublyListBase* self,
     self->cmp = cmp;
 }
 
-inline void _PoolDoublyListBase_Destroy(_PoolDoublyListBase* self)
+INLINE void _PoolDoublyListBase_Destroy(_PoolDoublyListBase* self)
 {
     ERR_RET_NULL(self);
     if (self->destroy && self->pool)
@@ -235,7 +235,7 @@ inline void _PoolDoublyListBase_Destroy(_PoolDoublyListBase* self)
     self->free_head = _PDNODE_POOL_NULL;
 }
 
-inline _PoolDoublyListBase* _PoolDoublyListBase_New(umax elem_size,
+INLINE _PoolDoublyListBase* _PoolDoublyListBase_New(umax elem_size,
     ElemConstructor* construct, ElemDestructor* destroy, ElemCopy* copy, CmpFunc cmp)
 {
     _PoolDoublyListBase* self = (_PoolDoublyListBase*)malloc(sizeof(_PoolDoublyListBase));
@@ -244,7 +244,7 @@ inline _PoolDoublyListBase* _PoolDoublyListBase_New(umax elem_size,
     return self;
 }
 
-inline void _PoolDoublyListBase_Delete(_PoolDoublyListBase* self)
+INLINE void _PoolDoublyListBase_Delete(_PoolDoublyListBase* self)
 {
     ERR_RET_NULL(self);
     _PoolDoublyListBase_Destroy(self);
@@ -253,7 +253,7 @@ inline void _PoolDoublyListBase_Delete(_PoolDoublyListBase* self)
 
 /* ---- Mutators ---- */
 
-inline void _PoolDoublyListBase_PushFront(_PoolDoublyListBase* self, const void* elem)
+INLINE void _PoolDoublyListBase_PushFront(_PoolDoublyListBase* self, const void* elem)
 {
     ERR_RET_NULL(self);
     ERR_RET_NULL(elem);
@@ -277,7 +277,7 @@ inline void _PoolDoublyListBase_PushFront(_PoolDoublyListBase* self, const void*
     self->size++;
 }
 
-inline void _PoolDoublyListBase_PopFront(_PoolDoublyListBase* self)
+INLINE void _PoolDoublyListBase_PopFront(_PoolDoublyListBase* self)
 {
     ERR_RET_NULL(self);
     if (self->head_next == _PDNODE_POOL_NULL) return;
@@ -296,7 +296,7 @@ inline void _PoolDoublyListBase_PopFront(_PoolDoublyListBase* self)
     _PoolDoublyListBase_Compact(self);
 }
 
-inline void _PoolDoublyListBase_PushBack(_PoolDoublyListBase* self, const void* elem)
+INLINE void _PoolDoublyListBase_PushBack(_PoolDoublyListBase* self, const void* elem)
 {
     ERR_RET_NULL(self);
     ERR_RET_NULL(elem);
@@ -320,7 +320,7 @@ inline void _PoolDoublyListBase_PushBack(_PoolDoublyListBase* self, const void* 
     self->size++;
 }
 
-inline void _PoolDoublyListBase_PopBack(_PoolDoublyListBase* self)
+INLINE void _PoolDoublyListBase_PopBack(_PoolDoublyListBase* self)
 {
     ERR_RET_NULL(self);
     if (self->head_prev == _PDNODE_POOL_NULL) return;
@@ -341,21 +341,21 @@ inline void _PoolDoublyListBase_PopBack(_PoolDoublyListBase* self)
 
 /* ---- Accessors ---- */
 
-inline void* _PoolDoublyListBase_Front(const _PoolDoublyListBase* self)
+INLINE void* _PoolDoublyListBase_Front(const _PoolDoublyListBase* self)
 {
     ERR_RET_V_NULL(self, NULL);
     if (self->head_next == _PDNODE_POOL_NULL) return NULL;
     return _PoolDList_Data(self->pool, self->node_size, self->head_next);
 }
 
-inline void* _PoolDoublyListBase_Back(const _PoolDoublyListBase* self)
+INLINE void* _PoolDoublyListBase_Back(const _PoolDoublyListBase* self)
 {
     ERR_RET_V_NULL(self, NULL);
     if (self->head_prev == _PDNODE_POOL_NULL) return NULL;
     return _PoolDList_Data(self->pool, self->node_size, self->head_prev);
 }
 
-inline void _PoolDoublyListBase_InsertBefore(_PoolDoublyListBase* self, umax pos_idx, const void* elem)
+INLINE void _PoolDoublyListBase_InsertBefore(_PoolDoublyListBase* self, umax pos_idx, const void* elem)
 {
     ERR_RET_NULL(self);
     ERR_RET_NULL(elem);
@@ -383,7 +383,7 @@ inline void _PoolDoublyListBase_InsertBefore(_PoolDoublyListBase* self, umax pos
     self->size++;
 }
 
-inline void _PoolDoublyListBase_Erase(_PoolDoublyListBase* self, umax idx)
+INLINE void _PoolDoublyListBase_Erase(_PoolDoublyListBase* self, umax idx)
 {
     ERR_RET_NULL(self);
     if (idx == _PDNODE_POOL_NULL) return;
@@ -406,7 +406,7 @@ inline void _PoolDoublyListBase_Erase(_PoolDoublyListBase* self, umax idx)
     _PoolDoublyListBase_Compact(self);
 }
 
-inline void _PoolDoublyListBase_Clear(_PoolDoublyListBase* self)
+INLINE void _PoolDoublyListBase_Clear(_PoolDoublyListBase* self)
 {
     ERR_RET_NULL(self);
     if (self->destroy && self->pool)
@@ -427,19 +427,19 @@ inline void _PoolDoublyListBase_Clear(_PoolDoublyListBase* self)
     self->size = 0;
 }
 
-inline bool _PoolDoublyListBase_IsEmpty(const _PoolDoublyListBase* self)
+INLINE bool _PoolDoublyListBase_IsEmpty(const _PoolDoublyListBase* self)
 {
     ERR_RET_V_NULL(self, false);
     return self->size == 0;
 }
 
-inline umax _PoolDoublyListBase_Size(const _PoolDoublyListBase* self)
+INLINE umax _PoolDoublyListBase_Size(const _PoolDoublyListBase* self)
 {
     ERR_RET_V_NULL(self, 0);
     return self->size;
 }
 
-inline void _PoolDoublyListBase_Reverse(_PoolDoublyListBase* self)
+INLINE void _PoolDoublyListBase_Reverse(_PoolDoublyListBase* self)
 {
     ERR_RET_NULL(self);
     if (self->size <= 1) return;
@@ -460,7 +460,7 @@ inline void _PoolDoublyListBase_Reverse(_PoolDoublyListBase* self)
 }
 
 /* 显式缩容 */
-inline void _PoolDoublyListBase_ShrinkToFit(_PoolDoublyListBase* self)
+INLINE void _PoolDoublyListBase_ShrinkToFit(_PoolDoublyListBase* self)
 {
     ERR_RET_NULL(self);
     if (self->size == 0)
@@ -596,7 +596,7 @@ inline void _PoolDoublyListBase_ShrinkToFit(_PoolDoublyListBase* self)
     PoolDoublyList_##T##_Iterator _PoolDoublyList_##T##_End(const PoolDoublyList_##T* self);        \
                                                                                                     \
     /* ===== Iterator Inline Definitions ===== */                                                   \
-    inline void _PoolDoublyList_##T##_Iterator##_Create(PoolDoublyList_##T##_Iterator* self)        \
+    INLINE void _PoolDoublyList_##T##_Iterator##_Create(PoolDoublyList_##T##_Iterator* self)        \
     {                                                                                               \
         static _PoolDoublyList_##T##_Iterator##_VTable vt = {                                      \
             _PoolDoublyList_##T##_Iterator##_Create,                                               \
@@ -616,12 +616,12 @@ inline void _PoolDoublyListBase_ShrinkToFit(_PoolDoublyListBase* self)
         self->index = _PDNODE_POOL_NULL;                                                            \
     }                                                                                               \
                                                                                                     \
-    inline void _PoolDoublyList_##T##_Iterator##_Destroy(PoolDoublyList_##T##_Iterator* self)       \
+    INLINE void _PoolDoublyList_##T##_Iterator##_Destroy(PoolDoublyList_##T##_Iterator* self)       \
     {                                                                                               \
         _Object_Destroy((Object*)self);                                                             \
     }                                                                                               \
                                                                                                     \
-    inline PoolDoublyList_##T##_Iterator* _PoolDoublyList_##T##_Iterator##_New()                    \
+    INLINE PoolDoublyList_##T##_Iterator* _PoolDoublyList_##T##_Iterator##_New()                    \
     {                                                                                               \
         PoolDoublyList_##T##_Iterator* self =                                                       \
             (PoolDoublyList_##T##_Iterator*)malloc(sizeof(PoolDoublyList_##T##_Iterator));          \
@@ -630,38 +630,38 @@ inline void _PoolDoublyListBase_ShrinkToFit(_PoolDoublyListBase* self)
         return self;                                                                                \
     }                                                                                               \
                                                                                                     \
-    inline void _PoolDoublyList_##T##_Iterator##_Delete(PoolDoublyList_##T##_Iterator* self)        \
+    INLINE void _PoolDoublyList_##T##_Iterator##_Delete(PoolDoublyList_##T##_Iterator* self)        \
     {                                                                                               \
         _PoolDoublyList_##T##_Iterator##_Destroy(self);                                             \
         free(self);                                                                                 \
     }                                                                                               \
                                                                                                     \
-    inline String* _PoolDoublyList_##T##_Iterator##_ToString(PoolDoublyList_##T##_Iterator* self)   \
+    INLINE String* _PoolDoublyList_##T##_Iterator##_ToString(PoolDoublyList_##T##_Iterator* self)   \
     {                                                                                               \
         String* str = New(String, STRING_CAPACITY);                                                 \
         Call(String, str, Append, "PoolDoublyListIterator");                                        \
         return str;                                                                                 \
     }                                                                                               \
                                                                                                     \
-    inline void* _PoolDoublyList_##T##_Iterator##_Raw(const PoolDoublyList_##T##_Iterator* self)    \
+    INLINE void* _PoolDoublyList_##T##_Iterator##_Raw(const PoolDoublyList_##T##_Iterator* self)    \
     {                                                                                               \
         if (self->index == _PDNODE_POOL_NULL) return NULL;                                          \
         return _PoolDList_Data(self->pool, self->node_size, self->index);                           \
     }                                                                                               \
                                                                                                     \
-    inline T _PoolDoublyList_##T##_Iterator##_Get(const PoolDoublyList_##T##_Iterator* self)        \
+    INLINE T _PoolDoublyList_##T##_Iterator##_Get(const PoolDoublyList_##T##_Iterator* self)        \
     {                                                                                               \
         if (self->index == _PDNODE_POOL_NULL) return (T){0};                                        \
         return *(T*)_PoolDList_Data(self->pool, self->node_size, self->index);                      \
     }                                                                                               \
                                                                                                     \
-    inline void _PoolDoublyList_##T##_Iterator##_Next(PoolDoublyList_##T##_Iterator* self)          \
+    INLINE void _PoolDoublyList_##T##_Iterator##_Next(PoolDoublyList_##T##_Iterator* self)          \
     {                                                                                               \
         if (self->index != _PDNODE_POOL_NULL)                                                       \
             self->index = _PoolDList_Next(self->pool, self->node_size, self->index);                \
     }                                                                                               \
                                                                                                     \
-    inline bool _PoolDoublyList_##T##_Iterator##_Equals(                                            \
+    INLINE bool _PoolDoublyList_##T##_Iterator##_Equals(                                            \
         const PoolDoublyList_##T##_Iterator* self,                                                  \
         const PoolDoublyList_##T##_Iterator* other)                                                 \
     {                                                                                               \
@@ -670,7 +670,7 @@ inline void _PoolDoublyListBase_ShrinkToFit(_PoolDoublyListBase* self)
     }                                                                                               \
                                                                                                     \
     /* ===== PoolDoublyList Inline Definitions ===== */                                             \
-    inline void _PoolDoublyList_##T##_Create(PoolDoublyList_##T* self)                              \
+    INLINE void _PoolDoublyList_##T##_Create(PoolDoublyList_##T* self)                              \
     {                                                                                               \
         static _PoolDoublyList_##T##_VTable vt = {                                                 \
             _PoolDoublyList_##T##_Create,                                                          \
@@ -697,12 +697,12 @@ inline void _PoolDoublyListBase_ShrinkToFit(_PoolDoublyListBase* self)
         self->vptr = (void*)&vt;                                                                   \
     }                                                                                               \
                                                                                                     \
-    inline void _PoolDoublyList_##T##_Destroy(PoolDoublyList_##T* self)                             \
+    INLINE void _PoolDoublyList_##T##_Destroy(PoolDoublyList_##T* self)                             \
     {                                                                                               \
         _PoolDoublyListBase_Destroy((_PoolDoublyListBase*)self);                                    \
     }                                                                                               \
                                                                                                     \
-    inline PoolDoublyList_##T* _PoolDoublyList_##T##_New()                                          \
+    INLINE PoolDoublyList_##T* _PoolDoublyList_##T##_New()                                          \
     {                                                                                               \
         PoolDoublyList_##T* self = (PoolDoublyList_##T*)malloc(sizeof(PoolDoublyList_##T));         \
         ERR_RET_V_NULL(self, NULL);                                                                 \
@@ -710,13 +710,13 @@ inline void _PoolDoublyListBase_ShrinkToFit(_PoolDoublyListBase* self)
         return self;                                                                                \
     }                                                                                               \
                                                                                                     \
-    inline void _PoolDoublyList_##T##_Delete(PoolDoublyList_##T* self)                              \
+    INLINE void _PoolDoublyList_##T##_Delete(PoolDoublyList_##T* self)                              \
     {                                                                                               \
         _PoolDoublyList_##T##_Destroy(self);                                                        \
         free(self);                                                                                 \
     }                                                                                               \
                                                                                                     \
-    inline String* _PoolDoublyList_##T##_ToString(PoolDoublyList_##T* self)                         \
+    INLINE String* _PoolDoublyList_##T##_ToString(PoolDoublyList_##T* self)                         \
     {                                                                                               \
         String* str = New(String, STRING_CAPACITY);                                                 \
         Call(String, str, Append, "PoolDoublyList<");                                               \
@@ -725,69 +725,69 @@ inline void _PoolDoublyListBase_ShrinkToFit(_PoolDoublyListBase* self)
         return str;                                                                                 \
     }                                                                                               \
                                                                                                     \
-    inline void _PoolDoublyList_##T##_PushFront(PoolDoublyList_##T* self, T val)                    \
+    INLINE void _PoolDoublyList_##T##_PushFront(PoolDoublyList_##T* self, T val)                    \
     {                                                                                               \
         _PoolDoublyListBase_PushFront((_PoolDoublyListBase*)self, &val);                            \
     }                                                                                               \
                                                                                                     \
-    inline void _PoolDoublyList_##T##_PopFront(PoolDoublyList_##T* self)                            \
+    INLINE void _PoolDoublyList_##T##_PopFront(PoolDoublyList_##T* self)                            \
     {                                                                                               \
         _PoolDoublyListBase_PopFront((_PoolDoublyListBase*)self);                                   \
     }                                                                                               \
                                                                                                     \
-    inline void _PoolDoublyList_##T##_PushBack(PoolDoublyList_##T* self, T val)                     \
+    INLINE void _PoolDoublyList_##T##_PushBack(PoolDoublyList_##T* self, T val)                     \
     {                                                                                               \
         _PoolDoublyListBase_PushBack((_PoolDoublyListBase*)self, &val);                             \
     }                                                                                               \
                                                                                                     \
-    inline void _PoolDoublyList_##T##_PopBack(PoolDoublyList_##T* self)                             \
+    INLINE void _PoolDoublyList_##T##_PopBack(PoolDoublyList_##T* self)                             \
     {                                                                                               \
         _PoolDoublyListBase_PopBack((_PoolDoublyListBase*)self);                                    \
     }                                                                                               \
                                                                                                     \
-    inline T* _PoolDoublyList_##T##_Front(const PoolDoublyList_##T* self)                           \
+    INLINE T* _PoolDoublyList_##T##_Front(const PoolDoublyList_##T* self)                           \
     {                                                                                               \
         return (T*)_PoolDoublyListBase_Front((const _PoolDoublyListBase*)self);                     \
     }                                                                                               \
                                                                                                     \
-    inline T* _PoolDoublyList_##T##_Back(const PoolDoublyList_##T* self)                            \
+    INLINE T* _PoolDoublyList_##T##_Back(const PoolDoublyList_##T* self)                            \
     {                                                                                               \
         return (T*)_PoolDoublyListBase_Back((const _PoolDoublyListBase*)self);                      \
     }                                                                                               \
                                                                                                     \
-    inline void _PoolDoublyList_##T##_Insert(PoolDoublyList_##T* self,                               \
+    INLINE void _PoolDoublyList_##T##_Insert(PoolDoublyList_##T* self,                               \
         PoolDoublyList_##T##_Iterator pos, T val)                                                  \
     {                                                                                               \
         _PoolDoublyListBase_InsertBefore((_PoolDoublyListBase*)self, pos.index, &val);              \
     }                                                                                               \
                                                                                                     \
-    inline void _PoolDoublyList_##T##_Erase(PoolDoublyList_##T* self,                                \
+    INLINE void _PoolDoublyList_##T##_Erase(PoolDoublyList_##T* self,                                \
         PoolDoublyList_##T##_Iterator pos)                                                          \
     {                                                                                               \
         _PoolDoublyListBase_Erase((_PoolDoublyListBase*)self, pos.index);                           \
     }                                                                                               \
                                                                                                     \
-    inline void _PoolDoublyList_##T##_Clear(PoolDoublyList_##T* self)                               \
+    INLINE void _PoolDoublyList_##T##_Clear(PoolDoublyList_##T* self)                               \
     {                                                                                               \
         _PoolDoublyListBase_Clear((_PoolDoublyListBase*)self);                                      \
     }                                                                                               \
                                                                                                     \
-    inline bool _PoolDoublyList_##T##_IsEmpty(const PoolDoublyList_##T* self)                       \
+    INLINE bool _PoolDoublyList_##T##_IsEmpty(const PoolDoublyList_##T* self)                       \
     {                                                                                               \
         return _PoolDoublyListBase_IsEmpty((const _PoolDoublyListBase*)self);                       \
     }                                                                                               \
                                                                                                     \
-    inline umax _PoolDoublyList_##T##_Size(const PoolDoublyList_##T* self)                          \
+    INLINE umax _PoolDoublyList_##T##_Size(const PoolDoublyList_##T* self)                          \
     {                                                                                               \
         return _PoolDoublyListBase_Size((const _PoolDoublyListBase*)self);                          \
     }                                                                                               \
                                                                                                     \
-    inline void _PoolDoublyList_##T##_Reverse(PoolDoublyList_##T* self)                             \
+    INLINE void _PoolDoublyList_##T##_Reverse(PoolDoublyList_##T* self)                             \
     {                                                                                               \
         _PoolDoublyListBase_Reverse((_PoolDoublyListBase*)self);                                    \
     }                                                                                               \
                                                                                                     \
-    inline PoolDoublyList_##T##_Iterator _PoolDoublyList_##T##_Begin(const PoolDoublyList_##T* self) \
+    INLINE PoolDoublyList_##T##_Iterator _PoolDoublyList_##T##_Begin(const PoolDoublyList_##T* self) \
     {                                                                                               \
         PoolDoublyList_##T##_Iterator it;                                                           \
         _PoolDoublyList_##T##_Iterator##_Create(&it);                                               \
@@ -798,7 +798,7 @@ inline void _PoolDoublyListBase_ShrinkToFit(_PoolDoublyListBase* self)
         return it;                                                                                  \
     }                                                                                               \
                                                                                                     \
-    inline PoolDoublyList_##T##_Iterator _PoolDoublyList_##T##_End(const PoolDoublyList_##T* self)   \
+    INLINE PoolDoublyList_##T##_Iterator _PoolDoublyList_##T##_End(const PoolDoublyList_##T* self)   \
     {                                                                                               \
         PoolDoublyList_##T##_Iterator it;                                                           \
         _PoolDoublyList_##T##_Iterator##_Create(&it);                                               \
