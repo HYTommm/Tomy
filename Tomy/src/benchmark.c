@@ -1,13 +1,17 @@
 ﻿#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
-#include <windows.h>
+#include <string.h>
+#include <stdlib.h>
 
 #include "tomy.h"
 #include "test_config.h"
 
 #ifdef BENCHMARK
 
-/* ============ High-precision timer ============ */
+/* ============ High-precision timer  (cross-platform) ============ */
+
+#ifdef _WIN32
+#include <windows.h>
 
 typedef struct
 {
@@ -26,6 +30,29 @@ static inline double Timer_ElapsedMs(Timer* t)
     QueryPerformanceCounter(&now);
     return (double)(now.QuadPart - t->start.QuadPart) * 1000.0 / (double)t->freq.QuadPart;
 }
+
+#else
+#include <time.h>
+
+typedef struct
+{
+    struct timespec start;
+} Timer;
+
+static inline void Timer_Start(Timer* t)
+{
+    clock_gettime(CLOCK_MONOTONIC, &t->start);
+}
+
+static inline double Timer_ElapsedMs(Timer* t)
+{
+    struct timespec now;
+    clock_gettime(CLOCK_MONOTONIC, &now);
+    double sec = (double)(now.tv_sec - t->start.tv_sec);
+    double nsec = (double)(now.tv_nsec - t->start.tv_nsec);
+    return sec * 1000.0 + nsec / 1000000.0;
+}
+#endif
 
 /* ============ Benchmark label width helper ============ */
 /* prints "  LABEL............ " padded to 34 chars */
