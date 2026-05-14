@@ -678,7 +678,7 @@ static void _test_dlist_sort_string(TestRunner* r)
 // Vector Find Tests (POD)
 // ============================================================
 
-static void _test_find_pred_i32(const i32* x) { return *x % 2 == 0; }
+static bool _test_find_pred_i32(const i32* x) { return *x % 2 == 0; }
 
 static void _test_vector_find_pod(TestRunner* r)
 {
