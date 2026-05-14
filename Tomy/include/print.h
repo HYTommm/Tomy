@@ -378,31 +378,31 @@ INLINE int format_from_va_list(String* str, const char* fmt, const int count, va
     return arg_index;
 }
 
-INLINE void parse_va_list(String* str, const char* sep, const int count, va_list args)
+INLINE void parse_va_list(String* str, const char* sep, int count, va_list args)
 {
-    const size_t sep_len = strlen(sep);
+    va_list args_copy;
+    va_copy(args_copy, args);
+    size_t sep_len = strlen(sep);
     for (int i = 0; i < count; i++)
     {
-        const int type = va_arg(args, int);
+        int type = va_arg(args_copy, int);
         if (i == 0 && (type == TYPE_STRING || type == TYPE_CONST_STRING))
         {
-            const char* fmt = va_arg(args, char*);
-            const int ret = format_from_va_list(str, fmt, count - 1, &args);
+            char* fmt = va_arg(args_copy, char*);
+            int ret = format_from_va_list(str, fmt, count - 1, &args_copy);
             i += ret;
         }
         else
         {
-            const size_t ret = read_from_va_list(str, type, &args);
-            if (ret == 0)
-            {
-                break;
-            }
+            size_t ret = read_from_va_list(str, type, &args_copy);
+            if (ret == 0) break;
         }
         if (i < count - 1)
         {
             [[maybe_unused]] bool ok = Call(String, str, AppendN, sep, sep_len);
         }
     }
+    va_end(args_copy);
 }
 
 INLINE String* format_func(const char* fmt, const int count, ...)
@@ -557,4 +557,3 @@ INLINE const char* reset_style(void)
 {
     return RESET_STYLE;
 }
-
