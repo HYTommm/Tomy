@@ -500,38 +500,38 @@ INLINE void _PoolListBase_ShrinkToFit(_PoolListBase* self)
     CLASS{ FROM(_PoolListBase); } PoolList_##T;                                                 \
                                                                                                 \
     /* ===== Iterator declarations ===== */                                                     \
-    void _PoolList_##T##_Iterator##_Create(PoolList_##T##_Iterator* self);                      \
-    void _PoolList_##T##_Iterator##_Destroy(PoolList_##T##_Iterator* self);                     \
-    PoolList_##T##_Iterator* _PoolList_##T##_Iterator##_New();                                  \
-    void _PoolList_##T##_Iterator##_Delete(PoolList_##T##_Iterator* self);                      \
-    String* _PoolList_##T##_Iterator##_ToString(PoolList_##T##_Iterator* self);                 \
-    void* _PoolList_##T##_Iterator##_Raw(const PoolList_##T##_Iterator* self);                  \
-    T _PoolList_##T##_Iterator##_Get(const PoolList_##T##_Iterator* self);                      \
-    void _PoolList_##T##_Iterator##_Next(PoolList_##T##_Iterator* self);                        \
-    bool _PoolList_##T##_Iterator##_Equals(                                                     \
+    INLINE void _PoolList_##T##_Iterator##_Create(PoolList_##T##_Iterator* self);                      \
+    INLINE void _PoolList_##T##_Iterator##_Destroy(PoolList_##T##_Iterator* self);                     \
+    INLINE PoolList_##T##_Iterator* _PoolList_##T##_Iterator##_New();                                  \
+    INLINE void _PoolList_##T##_Iterator##_Delete(PoolList_##T##_Iterator* self);                      \
+    INLINE String* _PoolList_##T##_Iterator##_ToString(PoolList_##T##_Iterator* self);                 \
+    INLINE void* _PoolList_##T##_Iterator##_Raw(const PoolList_##T##_Iterator* self);                  \
+    INLINE T _PoolList_##T##_Iterator##_Get(const PoolList_##T##_Iterator* self);                      \
+    INLINE void _PoolList_##T##_Iterator##_Next(PoolList_##T##_Iterator* self);                        \
+    INLINE bool _PoolList_##T##_Iterator##_Equals(                                                     \
         const PoolList_##T##_Iterator* self,                                                    \
         const PoolList_##T##_Iterator* other);                                                  \
                                                                                                 \
     /* ===== PoolList declarations ===== */                                                     \
-    void _PoolList_##T##_Create(PoolList_##T* self);                                            \
-    void _PoolList_##T##_Destroy(PoolList_##T* self);                                           \
-    PoolList_##T* _PoolList_##T##_New();                                                        \
-    void _PoolList_##T##_Delete(PoolList_##T* self);                                            \
-    String* _PoolList_##T##_ToString(PoolList_##T* self);                                       \
-    void _PoolList_##T##_PushFront(PoolList_##T* self, T val);                                  \
-    void _PoolList_##T##_PopFront(PoolList_##T* self);                                          \
-    void _PoolList_##T##_PushBack(PoolList_##T* self, T val);                                   \
-    T* _PoolList_##T##_Front(const PoolList_##T* self);                                         \
-    T* _PoolList_##T##_Back(const PoolList_##T* self);                                          \
-    void _PoolList_##T##_InsertAfter(PoolList_##T* self, PoolList_##T##_Iterator pos, T val);   \
-    void _PoolList_##T##_EraseAfter(PoolList_##T* self, PoolList_##T##_Iterator pos);           \
-    void _PoolList_##T##_Clear(PoolList_##T* self);                                             \
-    bool _PoolList_##T##_IsEmpty(const PoolList_##T* self);                                     \
-    umax _PoolList_##T##_Size(const PoolList_##T* self);                                        \
-    void _PoolList_##T##_Reverse(PoolList_##T* self);                                           \
-    PoolList_##T##_Iterator _PoolList_##T##_Begin(const PoolList_##T* self);                    \
-    PoolList_##T##_Iterator _PoolList_##T##_End(const PoolList_##T* self);                      \
-    PoolList_##T##_Iterator _PoolList_##T##_BeforeBegin(const PoolList_##T* self);              \
+    INLINE void _PoolList_##T##_Create(PoolList_##T* self);                                            \
+    INLINE void _PoolList_##T##_Destroy(PoolList_##T* self);                                           \
+    INLINE PoolList_##T* _PoolList_##T##_New();                                                        \
+    INLINE void _PoolList_##T##_Delete(PoolList_##T* self);                                            \
+    INLINE String* _PoolList_##T##_ToString(PoolList_##T* self);                                       \
+    INLINE void _PoolList_##T##_PushFront(PoolList_##T* self, T val);                                  \
+    INLINE void _PoolList_##T##_PopFront(PoolList_##T* self);                                          \
+    INLINE void _PoolList_##T##_PushBack(PoolList_##T* self, T val);                                   \
+    INLINE T* _PoolList_##T##_Front(const PoolList_##T* self);                                         \
+    INLINE T* _PoolList_##T##_Back(const PoolList_##T* self);                                          \
+    INLINE void _PoolList_##T##_InsertAfter(PoolList_##T* self, PoolList_##T##_Iterator pos, T val);   \
+    INLINE void _PoolList_##T##_EraseAfter(PoolList_##T* self, PoolList_##T##_Iterator pos);           \
+    INLINE void _PoolList_##T##_Clear(PoolList_##T* self);                                             \
+    INLINE bool _PoolList_##T##_IsEmpty(const PoolList_##T* self);                                     \
+    INLINE umax _PoolList_##T##_Size(const PoolList_##T* self);                                        \
+    INLINE void _PoolList_##T##_Reverse(PoolList_##T* self);                                           \
+    INLINE PoolList_##T##_Iterator _PoolList_##T##_Begin(const PoolList_##T* self);                    \
+    INLINE PoolList_##T##_Iterator _PoolList_##T##_End(const PoolList_##T* self);                      \
+    INLINE PoolList_##T##_Iterator _PoolList_##T##_BeforeBegin(const PoolList_##T* self);              \
                                                                                                 \
     /* ===== Iterator Inline Definitions ===== */                                               \
     INLINE void _PoolList_##T##_Iterator##_Create(PoolList_##T##_Iterator* self)                \

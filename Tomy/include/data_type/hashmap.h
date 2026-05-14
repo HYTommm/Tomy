@@ -483,44 +483,44 @@ VTABLE {                                                                        
 } _HashMap_##K##_##V##_VTable;                                                          \
                                                                                         \
 /* ---- Iterator declarations ---- */                                                   \
-void _HashMap_##K##_##V##_Iterator##_Create(HashMap_##K##_##V##_Iterator* self);        \
-void _HashMap_##K##_##V##_Iterator##_Destroy(HashMap_##K##_##V##_Iterator* self);       \
-HashMap_##K##_##V##_Iterator* _HashMap_##K##_##V##_Iterator##_New();                    \
-void _HashMap_##K##_##V##_Iterator##_Delete(HashMap_##K##_##V##_Iterator* self);        \
-String* _HashMap_##K##_##V##_Iterator##_ToString(HashMap_##K##_##V##_Iterator* self);   \
-void* _HashMap_##K##_##V##_Iterator##_Raw(const HashMap_##K##_##V##_Iterator* self);    \
-HashMap_##K##_##V##_Pair _HashMap_##K##_##V##_Iterator##_Get(                            \
+INLINE void _HashMap_##K##_##V##_Iterator##_Create(HashMap_##K##_##V##_Iterator* self);        \
+INLINE void _HashMap_##K##_##V##_Iterator##_Destroy(HashMap_##K##_##V##_Iterator* self);       \
+INLINE HashMap_##K##_##V##_Iterator* _HashMap_##K##_##V##_Iterator##_New();                    \
+INLINE void _HashMap_##K##_##V##_Iterator##_Delete(HashMap_##K##_##V##_Iterator* self);        \
+INLINE String* _HashMap_##K##_##V##_Iterator##_ToString(HashMap_##K##_##V##_Iterator* self);   \
+INLINE void* _HashMap_##K##_##V##_Iterator##_Raw(const HashMap_##K##_##V##_Iterator* self);    \
+INLINE HashMap_##K##_##V##_Pair _HashMap_##K##_##V##_Iterator##_Get(                            \
     const HashMap_##K##_##V##_Iterator* self);                                           \
-K*    _HashMap_##K##_##V##_Iterator##_Key(const HashMap_##K##_##V##_Iterator* self);    \
-V*    _HashMap_##K##_##V##_Iterator##_Value(const HashMap_##K##_##V##_Iterator* self);  \
-void  _HashMap_##K##_##V##_Iterator##_Next(HashMap_##K##_##V##_Iterator* self);         \
-bool  _HashMap_##K##_##V##_Iterator##_Equals(                                           \
+INLINE K*    _HashMap_##K##_##V##_Iterator##_Key(const HashMap_##K##_##V##_Iterator* self);    \
+INLINE V*    _HashMap_##K##_##V##_Iterator##_Value(const HashMap_##K##_##V##_Iterator* self);  \
+INLINE void  _HashMap_##K##_##V##_Iterator##_Next(HashMap_##K##_##V##_Iterator* self);         \
+INLINE bool  _HashMap_##K##_##V##_Iterator##_Equals(                                           \
     const HashMap_##K##_##V##_Iterator* self,                                           \
     const HashMap_##K##_##V##_Iterator* other);                                         \
                                                                                         \
 /* ---- HashMap declarations ---- */                                                    \
-void _HashMap_##K##_##V##_Create(HashMap_##K##_##V* self);                              \
-void _HashMap_##K##_##V##_Destroy(HashMap_##K##_##V* self);                             \
-HashMap_##K##_##V* _HashMap_##K##_##V##_New();                                          \
-void _HashMap_##K##_##V##_Delete(HashMap_##K##_##V* self);                              \
-String* _HashMap_##K##_##V##_ToString(HashMap_##K##_##V* self);                         \
-bool _HashMap_##K##_##V##_Insert(HashMap_##K##_##V* self, K key, V value);              \
-HashMap_##K##_##V##_Iterator _HashMap_##K##_##V##_Find(const HashMap_##K##_##V* self, K key);\
-V* _HashMap_##K##_##V##_At(const HashMap_##K##_##V* self, K key);                      \
-umax _HashMap_##K##_##V##_Count(const HashMap_##K##_##V* self, K key);                  \
-void _HashMap_##K##_##V##_Rehash(HashMap_##K##_##V* self, umax n);                     \
-bool _HashMap_##K##_##V##_Erase(HashMap_##K##_##V* self, K key);                        \
-bool _HashMap_##K##_##V##_Contains(const HashMap_##K##_##V* self, K key);               \
-umax _HashMap_##K##_##V##_Size(const HashMap_##K##_##V* self);                           \
-void _HashMap_##K##_##V##_Clear(HashMap_##K##_##V* self);                               \
-void _HashMap_##K##_##V##_ShrinkToFit(HashMap_##K##_##V* self);                         \
-bool _HashMap_##K##_##V##_Reserve(HashMap_##K##_##V* self, umax min_capacity);           \
-HashMap_##K##_##V##_Iterator _HashMap_##K##_##V##_Begin(const HashMap_##K##_##V* self); \
-HashMap_##K##_##V##_Iterator _HashMap_##K##_##V##_End(const HashMap_##K##_##V* self);   \
-bool _HashMap_##K##_##V##_IsEmpty(const HashMap_##K##_##V* self);                       \
-double _HashMap_##K##_##V##_LoadFactor(const HashMap_##K##_##V* self);                  \
-void _HashMap_##K##_##V##_Swap(HashMap_##K##_##V* self, HashMap_##K##_##V* other);      \
-bool _HashMap_##K##_##V##_TryEmplace(HashMap_##K##_##V* self, const K* key, const V* value);\
+INLINE void _HashMap_##K##_##V##_Create(HashMap_##K##_##V* self);                              \
+INLINE void _HashMap_##K##_##V##_Destroy(HashMap_##K##_##V* self);                             \
+INLINE HashMap_##K##_##V* _HashMap_##K##_##V##_New();                                          \
+INLINE void _HashMap_##K##_##V##_Delete(HashMap_##K##_##V* self);                              \
+INLINE String* _HashMap_##K##_##V##_ToString(HashMap_##K##_##V* self);                         \
+INLINE bool _HashMap_##K##_##V##_Insert(HashMap_##K##_##V* self, K key, V value);              \
+INLINE HashMap_##K##_##V##_Iterator _HashMap_##K##_##V##_Find(const HashMap_##K##_##V* self, K key);\
+INLINE V* _HashMap_##K##_##V##_At(const HashMap_##K##_##V* self, K key);                      \
+INLINE umax _HashMap_##K##_##V##_Count(const HashMap_##K##_##V* self, K key);                  \
+INLINE void _HashMap_##K##_##V##_Rehash(HashMap_##K##_##V* self, umax n);                     \
+INLINE bool _HashMap_##K##_##V##_Erase(HashMap_##K##_##V* self, K key);                        \
+INLINE bool _HashMap_##K##_##V##_Contains(const HashMap_##K##_##V* self, K key);               \
+INLINE umax _HashMap_##K##_##V##_Size(const HashMap_##K##_##V* self);                           \
+INLINE void _HashMap_##K##_##V##_Clear(HashMap_##K##_##V* self);                               \
+INLINE void _HashMap_##K##_##V##_ShrinkToFit(HashMap_##K##_##V* self);                         \
+INLINE bool _HashMap_##K##_##V##_Reserve(HashMap_##K##_##V* self, umax min_capacity);           \
+INLINE HashMap_##K##_##V##_Iterator _HashMap_##K##_##V##_Begin(const HashMap_##K##_##V* self); \
+INLINE HashMap_##K##_##V##_Iterator _HashMap_##K##_##V##_End(const HashMap_##K##_##V* self);   \
+INLINE bool _HashMap_##K##_##V##_IsEmpty(const HashMap_##K##_##V* self);                       \
+INLINE double _HashMap_##K##_##V##_LoadFactor(const HashMap_##K##_##V* self);                  \
+INLINE void _HashMap_##K##_##V##_Swap(HashMap_##K##_##V* self, HashMap_##K##_##V* other);      \
+INLINE bool _HashMap_##K##_##V##_TryEmplace(HashMap_##K##_##V* self, const K* key, const V* value);\
                                                                                         \
 /* ===== Iterator Inline Definitions ===== */                                           \
                                                                                         \

@@ -292,41 +292,41 @@ INLINE void _DoublyListBase_Reverse(_DoublyListBase* self)
     CLASS{ FROM(_DoublyListBase); } DoublyList_##T;                                                \
                                                                                                    \
     /* ===== Iterator declarations ===== */                                                        \
-    void _DoublyList_##T##_Iterator##_Create(DoublyList_##T##_Iterator* self);                     \
-    void _DoublyList_##T##_Iterator##_Destroy(DoublyList_##T##_Iterator* self);                    \
-    DoublyList_##T##_Iterator* _DoublyList_##T##_Iterator##_New();                                 \
-    void _DoublyList_##T##_Iterator##_Delete(DoublyList_##T##_Iterator* self);                     \
-    String* _DoublyList_##T##_Iterator##_ToString(DoublyList_##T##_Iterator* self);                \
-    void* _DoublyList_##T##_Iterator##_Raw(const DoublyList_##T##_Iterator* self);                 \
-    T _DoublyList_##T##_Iterator##_Get(const DoublyList_##T##_Iterator* self);                     \
-    void _DoublyList_##T##_Iterator##_Next(DoublyList_##T##_Iterator* self);                       \
-    bool _DoublyList_##T##_Iterator##_Equals(                                                      \
+    INLINE void _DoublyList_##T##_Iterator##_Create(DoublyList_##T##_Iterator* self);                     \
+    INLINE void _DoublyList_##T##_Iterator##_Destroy(DoublyList_##T##_Iterator* self);                    \
+    INLINE DoublyList_##T##_Iterator* _DoublyList_##T##_Iterator##_New();                                 \
+    INLINE void _DoublyList_##T##_Iterator##_Delete(DoublyList_##T##_Iterator* self);                     \
+    INLINE String* _DoublyList_##T##_Iterator##_ToString(DoublyList_##T##_Iterator* self);                \
+    INLINE void* _DoublyList_##T##_Iterator##_Raw(const DoublyList_##T##_Iterator* self);                 \
+    INLINE T _DoublyList_##T##_Iterator##_Get(const DoublyList_##T##_Iterator* self);                     \
+    INLINE void _DoublyList_##T##_Iterator##_Next(DoublyList_##T##_Iterator* self);                       \
+    INLINE bool _DoublyList_##T##_Iterator##_Equals(                                                      \
         const DoublyList_##T##_Iterator* self,                                                     \
         const DoublyList_##T##_Iterator* other);                                                   \
                                                                                                    \
     /* ===== DoublyList declarations ===== */                                                      \
-    void _DoublyList_##T##_Create(DoublyList_##T* self);                                           \
-    void _DoublyList_##T##_Destroy(DoublyList_##T* self);                                          \
-    DoublyList_##T* _DoublyList_##T##_New();                                                       \
-    void _DoublyList_##T##_Delete(DoublyList_##T* self);                                           \
-    String* _DoublyList_##T##_ToString(DoublyList_##T* self);                                      \
-    void _DoublyList_##T##_PushFront(DoublyList_##T* self, T val);                                 \
-    void _DoublyList_##T##_PopFront(DoublyList_##T* self);                                         \
-    void _DoublyList_##T##_PushBack(DoublyList_##T* self, T val);                                  \
-    void _DoublyList_##T##_PopBack(DoublyList_##T* self);                                          \
-    T* _DoublyList_##T##_Front(const DoublyList_##T* self);                                        \
-    T* _DoublyList_##T##_Back(const DoublyList_##T* self);                                         \
-    void _DoublyList_##T##_Insert(DoublyList_##T* self, DoublyList_##T##_Iterator pos, T val);     \
-    void _DoublyList_##T##_Erase(DoublyList_##T* self, DoublyList_##T##_Iterator pos);             \
-    void _DoublyList_##T##_Clear(DoublyList_##T* self);                                            \
-    bool _DoublyList_##T##_IsEmpty(const DoublyList_##T* self);                                    \
-    umax _DoublyList_##T##_Size(const DoublyList_##T* self);                                       \
-    void _DoublyList_##T##_Reverse(DoublyList_##T* self);                                          \
-    T* _DoublyList_##T##_Find(DoublyList_##T* self, T value);                                    \
-    T* _DoublyList_##T##_FindIf(DoublyList_##T* self, bool (*pred)(const T*));                    \
-    umax _DoublyList_##T##_Count(DoublyList_##T* self, T value);                                  \
-    DoublyList_##T##_Iterator _DoublyList_##T##_Begin(const DoublyList_##T* self);                 \
-    DoublyList_##T##_Iterator _DoublyList_##T##_End(const DoublyList_##T* self);                   \
+    INLINE void _DoublyList_##T##_Create(DoublyList_##T* self);                                           \
+    INLINE void _DoublyList_##T##_Destroy(DoublyList_##T* self);                                          \
+    INLINE DoublyList_##T* _DoublyList_##T##_New();                                                       \
+    INLINE void _DoublyList_##T##_Delete(DoublyList_##T* self);                                           \
+    INLINE String* _DoublyList_##T##_ToString(DoublyList_##T* self);                                      \
+    INLINE void _DoublyList_##T##_PushFront(DoublyList_##T* self, T val);                                 \
+    INLINE void _DoublyList_##T##_PopFront(DoublyList_##T* self);                                         \
+    INLINE void _DoublyList_##T##_PushBack(DoublyList_##T* self, T val);                                  \
+    INLINE void _DoublyList_##T##_PopBack(DoublyList_##T* self);                                          \
+    INLINE T* _DoublyList_##T##_Front(const DoublyList_##T* self);                                        \
+    INLINE T* _DoublyList_##T##_Back(const DoublyList_##T* self);                                         \
+    INLINE void _DoublyList_##T##_Insert(DoublyList_##T* self, DoublyList_##T##_Iterator pos, T val);     \
+    INLINE void _DoublyList_##T##_Erase(DoublyList_##T* self, DoublyList_##T##_Iterator pos);             \
+    INLINE void _DoublyList_##T##_Clear(DoublyList_##T* self);                                            \
+    INLINE bool _DoublyList_##T##_IsEmpty(const DoublyList_##T* self);                                    \
+    INLINE umax _DoublyList_##T##_Size(const DoublyList_##T* self);                                       \
+    INLINE void _DoublyList_##T##_Reverse(DoublyList_##T* self);                                          \
+    INLINE T* _DoublyList_##T##_Find(DoublyList_##T* self, T value);                                    \
+    INLINE T* _DoublyList_##T##_FindIf(DoublyList_##T* self, bool (*pred)(const T*));                    \
+    INLINE umax _DoublyList_##T##_Count(DoublyList_##T* self, T value);                                  \
+    INLINE DoublyList_##T##_Iterator _DoublyList_##T##_Begin(const DoublyList_##T* self);                 \
+    INLINE DoublyList_##T##_Iterator _DoublyList_##T##_End(const DoublyList_##T* self);                   \
                                                                                                    \
     /* ===== Iterator Inline Definitions ===== */                                                  \
     INLINE void _DoublyList_##T##_Iterator##_Create(DoublyList_##T##_Iterator* self)               \

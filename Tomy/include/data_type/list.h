@@ -269,41 +269,41 @@ INLINE void _ListBase_Reverse(_ListBase* self)
     CLASS{ FROM(_ListBase); } List_##T;                                                         \
                                                                                                 \
     /* ===== Iterator declarations ===== */                                                     \
-    void _List_##T##_Iterator##_Create(List_##T##_Iterator* self);                              \
-    void _List_##T##_Iterator##_Destroy(List_##T##_Iterator* self);                             \
-    List_##T##_Iterator* _List_##T##_Iterator##_New();                                          \
-    void _List_##T##_Iterator##_Delete(List_##T##_Iterator* self);                              \
-    String* _List_##T##_Iterator##_ToString(List_##T##_Iterator* self);                         \
-    void* _List_##T##_Iterator##_Raw(const List_##T##_Iterator* self);                          \
-    T _List_##T##_Iterator##_Get(const List_##T##_Iterator* self);                              \
-    void _List_##T##_Iterator##_Next(List_##T##_Iterator* self);                                \
-    bool _List_##T##_Iterator##_Equals(                                                         \
+    INLINE void _List_##T##_Iterator##_Create(List_##T##_Iterator* self);                              \
+    INLINE void _List_##T##_Iterator##_Destroy(List_##T##_Iterator* self);                             \
+    INLINE List_##T##_Iterator* _List_##T##_Iterator##_New();                                          \
+    INLINE void _List_##T##_Iterator##_Delete(List_##T##_Iterator* self);                              \
+    INLINE String* _List_##T##_Iterator##_ToString(List_##T##_Iterator* self);                         \
+    INLINE void* _List_##T##_Iterator##_Raw(const List_##T##_Iterator* self);                          \
+    INLINE T _List_##T##_Iterator##_Get(const List_##T##_Iterator* self);                              \
+    INLINE void _List_##T##_Iterator##_Next(List_##T##_Iterator* self);                                \
+    INLINE bool _List_##T##_Iterator##_Equals(                                                         \
         const List_##T##_Iterator* self,                                                        \
         const List_##T##_Iterator* other);                                                      \
                                                                                                 \
     /* ===== List declarations ===== */                                                         \
-    void _List_##T##_Create(List_##T* self);                                                    \
-    void _List_##T##_Destroy(List_##T* self);                                                   \
-    List_##T* _List_##T##_New();                                                                \
-    void _List_##T##_Delete(List_##T* self);                                                    \
-    String* _List_##T##_ToString(List_##T* self);                                               \
-    void _List_##T##_PushFront(List_##T* self, T val);                                          \
-    void _List_##T##_PopFront(List_##T* self);                                                  \
-    void _List_##T##_PushBack(List_##T* self, T val);                                           \
-    T* _List_##T##_Front(const List_##T* self);                                                 \
-    T* _List_##T##_Back(const List_##T* self);                                                  \
-    void _List_##T##_InsertAfter(List_##T* self, List_##T##_Iterator pos, T val);              \
-    void _List_##T##_EraseAfter(List_##T* self, List_##T##_Iterator pos);                      \
-    void _List_##T##_Clear(List_##T* self);                                                     \
-    bool _List_##T##_IsEmpty(const List_##T* self);                                             \
-    umax _List_##T##_Size(const List_##T* self);                                                \
-    void _List_##T##_Reverse(List_##T* self);                                                   \
-    T* _List_##T##_Find(List_##T* self, T value);                                             \
-    T* _List_##T##_FindIf(List_##T* self, bool (*pred)(const T*));                             \
-    umax _List_##T##_Count(List_##T* self, T value);                                           \
-    List_##T##_Iterator _List_##T##_Begin(const List_##T* self);                               \
-    List_##T##_Iterator _List_##T##_End(const List_##T* self);                                 \
-    List_##T##_Iterator _List_##T##_BeforeBegin(const List_##T* self);                         \
+    INLINE void _List_##T##_Create(List_##T* self);                                                    \
+    INLINE void _List_##T##_Destroy(List_##T* self);                                                   \
+    INLINE List_##T* _List_##T##_New();                                                                \
+    INLINE void _List_##T##_Delete(List_##T* self);                                                    \
+    INLINE String* _List_##T##_ToString(List_##T* self);                                               \
+    INLINE void _List_##T##_PushFront(List_##T* self, T val);                                          \
+    INLINE void _List_##T##_PopFront(List_##T* self);                                                  \
+    INLINE void _List_##T##_PushBack(List_##T* self, T val);                                           \
+    INLINE T* _List_##T##_Front(const List_##T* self);                                                 \
+    INLINE T* _List_##T##_Back(const List_##T* self);                                                  \
+    INLINE void _List_##T##_InsertAfter(List_##T* self, List_##T##_Iterator pos, T val);              \
+    INLINE void _List_##T##_EraseAfter(List_##T* self, List_##T##_Iterator pos);                      \
+    INLINE void _List_##T##_Clear(List_##T* self);                                                     \
+    INLINE bool _List_##T##_IsEmpty(const List_##T* self);                                             \
+    INLINE umax _List_##T##_Size(const List_##T* self);                                                \
+    INLINE void _List_##T##_Reverse(List_##T* self);                                                   \
+    INLINE T* _List_##T##_Find(List_##T* self, T value);                                             \
+    INLINE T* _List_##T##_FindIf(List_##T* self, bool (*pred)(const T*));                             \
+    INLINE umax _List_##T##_Count(List_##T* self, T value);                                           \
+    INLINE List_##T##_Iterator _List_##T##_Begin(const List_##T* self);                               \
+    INLINE List_##T##_Iterator _List_##T##_End(const List_##T* self);                                 \
+    INLINE List_##T##_Iterator _List_##T##_BeforeBegin(const List_##T* self);                         \
                                                                                                 \
     /* ===== Iterator Inline Definitions ===== */                                               \
     INLINE void _List_##T##_Iterator##_Create(List_##T##_Iterator* self)                        \

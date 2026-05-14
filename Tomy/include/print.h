@@ -196,20 +196,20 @@ typedef struct print_config_t
     bool flush;
 } PrintConfig;
 
-String* format_func(const char* fmt, int count, ...);
-void print_func(const PrintConfig* config, int count, ...);
-void println_func(const PrintConfig* config, int count, ...);
-String* set_cursor_pos(int x, int y);
-String* set_fg_idx(int idx);
-String* set_fg_rgb(int r, int g, int b);
-String* set_fg_color(Color24 color);
-String* set_bg_idx(int idx);
-String* set_bg_rgb(int r, int g, int b);
-String* set_bg_color(Color24 color);
-String* set_colors_idx(int fg_idx, int bg_idx);
-String* set_colors_rgb(int fg_r, int fg_g, int fg_b, int bg_r, int bg_g, int bg_b);
-String* set_colors_color(Color24 fg_color, Color24 bg_color);
-const char* reset_style(void);
+INLINE String* format_func(const char* fmt, int count, ...);
+INLINE void print_func(const PrintConfig* config, int count, ...);
+INLINE void println_func(const PrintConfig* config, int count, ...);
+INLINE String* set_cursor_pos(int x, int y);
+INLINE String* set_fg_idx(int idx);
+INLINE String* set_fg_rgb(int r, int g, int b);
+INLINE String* set_fg_color(Color24 color);
+INLINE String* set_bg_idx(int idx);
+INLINE String* set_bg_rgb(int r, int g, int b);
+INLINE String* set_bg_color(Color24 color);
+INLINE String* set_colors_idx(int fg_idx, int bg_idx);
+INLINE String* set_colors_rgb(int fg_r, int fg_g, int fg_b, int bg_r, int bg_g, int bg_b);
+INLINE String* set_colors_color(Color24 fg_color, Color24 bg_color);
+INLINE const char* reset_style(void);
 
 int _fast_print(const char* format, ...);
 
@@ -558,11 +558,3 @@ INLINE const char* reset_style(void)
     return RESET_STYLE;
 }
 
-INLINE int _fast_print(const char* format, ...)
-{
-    va_list args;
-    va_start(args, format);
-    const int ret = vprintf(format, args);
-    va_end(args);
-    return ret;
-}

@@ -206,10 +206,12 @@ enum
 #endif
 #endif
 
-// General-purpose inline: uses static inline on GCC/Clang to avoid multiple-definition
-// issues at -O0; uses plain inline on MSVC where it's handled correctly.
+// GCC 13 C23 模式仍用 C99 inline 语义（__GNUC_STDC_INLINE__），
+// inline 不发射外部符号。使用 static inline 确保每个 TU 有独立副本，
+// 所有取地址（vtable 初始化）的场景均正常工作。
+// 所有前向声明也必须使用 INLINE 以避免 "static follows non-static" 错误。
 #ifndef INLINE
-#ifdef _MSC_VER
+#if defined(_MSC_VER)
 #define INLINE inline
 #else
 #define INLINE static inline

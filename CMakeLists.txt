@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.15)
 project(Tomy VERSION 1.0.0 LANGUAGES C)
 
+# 未指定 CMAKE_BUILD_TYPE 时默认 Debug（使 C23 inline 依赖的 -Og 生效）
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
+endif()
+
 # ═══════════════════════════════════════════════════════════════
 #  C23 标准检测
 #  项目使用 C23 特性: #elifdef, __VA_OPT__, [[maybe_unused]], auto
@@ -50,9 +55,10 @@ else()
   add_compile_options(-Wno-unused-parameter -Wno-unused-function -Wno-unused-variable)
   # 生效 typedef 匿名结构体嵌入（代码通过 VTABLE{ FROM(base) ... } 实现继承）
   add_compile_options(-fms-extensions)
-  # Debug 模式用 -Og 代替默认 -O0，使 C23 inline 生成 COMDAT/weak symbol
-  # 避免 inline 函数在多个 TU 中重复定义（对齐 C++ inline 语义）
-  add_compile_options($<$<CONFIG:Debug>:-Og>)
+  # C23 inline 需要至少 -Og 才能正确生成 COMDAT/weak symbol。
+  # 全局添加 -Og，Release 的 -O2/-O3 会覆盖它（最后出现的 -O 生效）。
+  # Debug 或未设 build type 时 -Og 保底确保 C23 inline 正常工作。
+  add_compile_options(-Og)
 endif()
 
 # ═══════════════════════════════════════════════════════════════
