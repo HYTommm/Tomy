@@ -86,6 +86,44 @@ void result_test_string(TestRunner* r)
         Result_Destroy(i32, String, &res);
     }
 
+    TEST_GROUP(r, "Copy POD");
+    {
+        Result(i32, i32) a = Result_Ok(i32, i32, 42);
+        Result(i32, i32) b = Result_Err(i32, i32, -1);
+        Result_Copy(i32, i32, &b, &a);
+        TEST_ASSERT(r, Result_IsOk(i32, i32, b));
+        TEST_ASSERT_EQ(r, *Result_AsPtr(i32, i32, b), 42);
+    }
+
+    TEST_GROUP(r, "Copy self");
+    {
+        Result(i32, i32) a = Result_Ok(i32, i32, 7);
+        Result_Copy(i32, i32, &a, &a);
+        TEST_ASSERT(r, Result_IsOk(i32, i32, a));
+        TEST_ASSERT_EQ(r, *Result_AsPtr(i32, i32, a), 7);
+    }
+
+    TEST_GROUP(r, "Copy String error");
+    {
+        String s;
+        Create(String, &s);
+        Call(String, &s, Append, "err_msg");
+
+        Result(i32, String) a = Result_Err(i32, String, s);
+        Result(i32, String) b = Result_Ok(i32, String, 0);
+
+        Result_Copy(i32, String, &b, &a);
+        TEST_ASSERT(r, Result_IsErr(i32, String, b));
+        TEST_ASSERT(r, strcmp(b.error.data, "err_msg") == 0);
+        /* b 是独立深拷贝，Destroy a 不影响 b */
+        Result_Destroy(i32, String, &a);
+        TEST_ASSERT(r, Result_IsErr(i32, String, b));
+        TEST_ASSERT(r, strcmp(b.error.data, "err_msg") == 0);
+        Result_Destroy(i32, String, &b);
+
+        Call(String, &s, Destroy);
+    }
+
     TEST_GROUP(r, "Destroy idempotent");
     {
         String s;

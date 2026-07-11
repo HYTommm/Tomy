@@ -62,6 +62,20 @@
         return (opt && opt->has_value) ? &opt->value : NULL;                                           \
     }                                                                                                   \
                                                                                                         \
+    INLINE void Optional_##T##_Copy(Optional_##T* dest, const Optional_##T* src) {                     \
+        if (dest == src) return;                                                                        \
+        if (dest->has_value) {                                                                         \
+            void (*_d)(void*) = (void (*)(void*))DESTROY;                                              \
+            if (_d) _d(&dest->value);                                                                  \
+        }                                                                                              \
+        dest->has_value = src->has_value;                                                               \
+        if (src->has_value) {                                                                          \
+            void (*_c)(void*, const void*) = (void (*)(void*, const void*))COPY;                       \
+            if (_c) _c(&dest->value, &src->value);                                                     \
+            else   dest->value = src->value;                                                           \
+        }                                                                                              \
+    }                                                                                                   \
+                                                                                                        \
     INLINE void Optional_##T##_Destroy(Optional_##T* opt) {                                            \
         if (opt && opt->has_value) {                                                                   \
             void (*_d)(void*) = (void (*)(void*))DESTROY;                                              \
@@ -100,6 +114,7 @@
 #define Optional_IsSome(T, o)   _Optional_Fn(T, _IsSome)(&(o))
 #define Optional_IsNone(T, o)   _Optional_Fn(T, _IsNone)(&(o))
 #define Optional_AsPtr(T, o)    _Optional_Fn(T, _AsPtr)(&(o))
+#define Optional_Copy(T, d, s)  _Optional_Fn(T, _Copy)((d), (s))
 #define Optional_Destroy(T, o)  _Optional_Fn(T, _Destroy)((o))
 #define Optional_Reset(T, o, v) _Optional_Fn(T, _Reset)((o), (v))
 

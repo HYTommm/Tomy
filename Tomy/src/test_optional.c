@@ -69,6 +69,23 @@ void optional_test_pod(TestRunner* r)
         TEST_ASSERT_EQ(r, *Optional_AsPtr(i32, opt), 20);
     }
 
+    TEST_GROUP(r, "Copy POD");
+    {
+        Optional(i32) a = Optional_Some(i32, 42);
+        Optional(i32) b = Optional_None(i32);
+        Optional_Copy(i32, &b, &a);
+        TEST_ASSERT(r, Optional_IsSome(i32, b));
+        TEST_ASSERT_EQ(r, *Optional_AsPtr(i32, b), 42);
+    }
+
+    TEST_GROUP(r, "Copy self");
+    {
+        Optional(i32) a = Optional_Some(i32, 7);
+        Optional_Copy(i32, &a, &a);  /* no-op, shouldn't crash */
+        TEST_ASSERT(r, Optional_IsSome(i32, a));
+        TEST_ASSERT_EQ(r, *Optional_AsPtr(i32, a), 7);
+    }
+
     TEST_GROUP(r, "f64 type");
     {
         Optional(f64) opt = Optional_Some(f64, 3.14);
@@ -129,6 +146,27 @@ void optional_test_string(TestRunner* r)
         Optional_Destroy(String, &opt);
         Call(String, &a, Destroy);
         Call(String, &b, Destroy);
+    }
+
+    TEST_GROUP(r, "Copy String");
+    {
+        String s;
+        Create(String, &s);
+        Call(String, &s, Append, "hello");
+
+        Optional(String) a = Optional_Some(String, s);
+        Optional(String) b = Optional_None(String);
+
+        Optional_Copy(String, &b, &a);
+        TEST_ASSERT(r, Optional_IsSome(String, b));
+        TEST_ASSERT_STR_EQ(r, Optional_AsPtr(String, &b)->data, "hello");
+        /* b 是独立深拷贝，Destroy a 不影响 b */
+        Optional_Destroy(String, &a);
+        TEST_ASSERT(r, Optional_IsNone(String, a));
+        TEST_ASSERT_STR_EQ(r, Optional_AsPtr(String, &b)->data, "hello");
+        Optional_Destroy(String, &b);
+
+        Call(String, &s, Destroy);
     }
 
     TEST_GROUP(r, "Destroy idempotent");

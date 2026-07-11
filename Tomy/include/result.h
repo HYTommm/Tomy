@@ -66,6 +66,27 @@
         return (r && r->ok) ? &r->value : NULL;                                                     \
     }                                                                                               \
                                                                                                     \
+    INLINE void Result_##T##_##E##_Copy(Result_##T##_##E* dest, const Result_##T##_##E* src) {            \
+        if (dest == src) return;                                                                        \
+        if (dest->ok) {                                                                                 \
+            void (*_vd)(void*) = (void (*)(void*))VAL_DESTROY;                                          \
+            if (_vd) _vd(&dest->value);                                                                 \
+        } else {                                                                                        \
+            void (*_ed)(void*) = (void (*)(void*))ERR_DESTROY;                                          \
+            if (_ed) _ed(&dest->error);                                                                 \
+        }                                                                                               \
+        dest->ok = src->ok;                                                                             \
+        if (src->ok) {                                                                                  \
+            void (*_vc)(void*, const void*) = (void (*)(void*, const void*))VAL_COPY;                  \
+            if (_vc) { memset(&dest->value, 0, sizeof(T)); _vc(&dest->value, &src->value); }          \
+            else dest->value = src->value;                                                              \
+        } else {                                                                                        \
+            void (*_ec)(void*, const void*) = (void (*)(void*, const void*))ERR_COPY;                  \
+            if (_ec) { memset(&dest->error, 0, sizeof(E)); _ec(&dest->error, &src->error); }          \
+            else dest->error = src->error;                                                              \
+        }                                                                                               \
+    }                                                                                                   \
+                                                                                                        \
     INLINE void Result_##T##_##E##_Destroy(Result_##T##_##E* r) {                                  \
         if (!r) return;                                                                             \
         if (r->ok) {                                                                                \
@@ -98,4 +119,5 @@
 #define Result_IsOk(T, E, r)    _Result_Fn(T, E, _IsOk)(&(r))
 #define Result_IsErr(T, E, r)   _Result_Fn(T, E, _IsErr)(&(r))
 #define Result_AsPtr(T, E, r)   _Result_Fn(T, E, _AsPtr)(&(r))
+#define Result_Copy(T, E, d, s) _Result_Fn(T, E, _Copy)((d), (s))
 #define Result_Destroy(T, E, r) _Result_Fn(T, E, _Destroy)((r))
