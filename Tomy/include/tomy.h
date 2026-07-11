@@ -19,6 +19,8 @@
 #include "data_type/doublylist.h"
 #include "data_type/pool_list.h"
 #include "data_type/pool_doublylist.h"
+#include "optional.h"
+#include "result.h"
 #include "print.h"
 #include "error.h"
 #include "lifetime.h"

@@ -336,7 +336,7 @@ INLINE double _min_double(const double a, const double b)
 //              !VCall(ITER_TYPE(container_type), &_it_, equals, &_end_) && _keep_;                    \
 //              VCall(ITER_TYPE(container_type), &_it_, next), _keep_ = !_keep_)                       \
 //             for (auto elem = VCall(ITER_TYPE(container_type), &_it_, get); _keep_; _keep_ = !_keep_)
-// #else
+#else
 
 #define foreach(container_type, elem, container)                                                    \
     for (int _keep_ = 1; _keep_; _keep_ = 0)                                                        \

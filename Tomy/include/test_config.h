@@ -60,7 +60,19 @@
 #define POOLDList_TEST_EDGE
 #endif
 
-#define LIFETIME_TEST
+#define OPTIONAL_TEST
+#ifdef OPTIONAL_TEST
+#define OPTIONAL_TEST_POD
+#define OPTIONAL_TEST_STRING
+#endif
+
+#define RESULT_TEST
+#ifdef RESULT_TEST
+#define RESULT_TEST_POD
+#define RESULT_TEST_STRING
+#endif
+
+//#define LIFETIME_TEST
 
 #define BENCHMARK
 #ifdef BENCHMARK

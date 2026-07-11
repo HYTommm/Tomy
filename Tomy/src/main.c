@@ -54,6 +54,12 @@ void benchmark(void);
 #ifdef LIFETIME_TEST
 void lifetime_test(void);
 #endif
+#ifdef OPTIONAL_TEST
+void optional_test(void);
+#endif
+#ifdef RESULT_TEST
+void result_test(void);
+#endif
 
 void test(void)
 {
@@ -101,6 +107,12 @@ void test(void)
 #endif
 #ifdef LIFETIME_TEST
     lifetime_test();
+#endif
+#ifdef OPTIONAL_TEST
+    optional_test();
+#endif
+#ifdef RESULT_TEST
+    result_test();
 #endif
 }
 

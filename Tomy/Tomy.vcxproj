@@ -151,7 +151,9 @@
     <ClInclude Include="include\error.h" />
     <ClInclude Include="include\macro.h" />
     <ClInclude Include="include\class\object_class.h" />
+    <ClInclude Include="include\optional.h" />
     <ClInclude Include="include\print.h" />
+    <ClInclude Include="include\result.h" />
     <ClInclude Include="include\test.h" />
     <ClInclude Include="include\test_config.h" />
     <ClInclude Include="include\tomy.h" />
@@ -166,8 +168,10 @@
     <ClCompile Include="src\test_hashmap.c" />
     <ClCompile Include="src\test_list.c" />
     <ClCompile Include="src\test_print.c" />
-    <ClCompile Include="src\test_pool_list.c" />
+    <ClCompile Include="src\test_optional.c" />
     <ClCompile Include="src\test_pool_dlist.c" />
+    <ClCompile Include="src\test_pool_list.c" />
+    <ClCompile Include="src\test_result.c" />
     <ClCompile Include="src\test_vector.c" />
     <ClCompile Include="src\ustring.c" />
   </ItemGroup>
