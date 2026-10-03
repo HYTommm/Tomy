@@ -181,7 +181,10 @@ static inline void _PoolDoublyListBase_Compact(_PoolDoublyListBase* self)
     /* Free list */
     for (umax i = new_idx; i < new_cap; ++i)
         *(umax*)(new_pool + i * self->node_size) = i + 1;
-    if (new_cap > 0)
+    /* 同 ShrinkToFit：终止符只能落在空闲槽上。这里 new_cap = capacity/2 > size，
+       new_idx < new_cap 恒成立，所以本来就没写错；加上守卫是为了让这个不变量
+       显式可见，别再被后来改动破坏。 */
+    if (new_idx < new_cap)
         *(umax*)(new_pool + (new_cap - 1) * self->node_size) = _PDNODE_POOL_NULL;
 
     free(self->pool);
@@ -359,9 +362,15 @@ INLINE void _PoolDoublyListBase_InsertBefore(_PoolDoublyListBase* self, umax pos
 {
     ERR_RET_NULL(self);
     ERR_RET_NULL(elem);
-    if (pos_idx == _PDNODE_POOL_NULL) return; /* insert at end = PushBack */
-    /* Actually pos_idx == NULL means insert before end… we use PushBack for that case. */
-    /* But this function is always called with a valid node index. */
+    /* pos_idx == _PDNODE_POOL_NULL 就是 end()：语义是"插到末尾"，等同于 PushBack。
+       原来这里直接 return，等于把元素静默丢弃。 */
+    if (pos_idx == _PDNODE_POOL_NULL)
+    {
+        _PoolDoublyListBase_PushBack(self, elem);
+        return;
+    }
+    /* 迭代器可能因 Compact 缩容重编号而失效，下标越界不能当数组下标用 */
+    ERR_RET_V_COND(pos_idx >= self->capacity, );
 
     umax idx = _PoolDoublyListBase_AllocSlot(self);
     if (idx == _PDNODE_POOL_NULL) return;
@@ -387,6 +396,7 @@ INLINE void _PoolDoublyListBase_Erase(_PoolDoublyListBase* self, umax idx)
 {
     ERR_RET_NULL(self);
     if (idx == _PDNODE_POOL_NULL) return;
+    ERR_RET_V_COND(idx >= self->capacity, );   /* 失效迭代器的下标不能当数组下标用 */
 
     umax prv = _PoolDList_Prev(self->pool, self->node_size, idx);
     umax nxt = _PoolDList_Next(self->pool, self->node_size, idx);
@@ -513,7 +523,12 @@ INLINE void _PoolDoublyListBase_ShrinkToFit(_PoolDoublyListBase* self)
 
     for (umax i = new_idx; i < new_cap; ++i)
         *(umax*)(new_pool + i * self->node_size) = i + 1;
-    if (new_cap > 0)
+    /* free list 的终止符只能写在**空闲槽**上。原来这里写的是 `if (new_cap > 0)`：
+       ShrinkToFit 会把 new_cap 收到正好等于 size，于是 new_idx == new_cap，
+       循环一次都不执行，而这一行照样去覆盖槽 new_cap-1 —— 那是一个**活动节点**，
+       这 8 字节是双向链表的前驱索引，不是 free list 的 next。
+       最后一个节点的 prev 被清成 NULL 后，一次 PopBack 就会把整条链断开。 */
+    if (new_idx < new_cap)
         *(umax*)(new_pool + (new_cap - 1) * self->node_size) = _PDNODE_POOL_NULL;
 
     free(self->pool);

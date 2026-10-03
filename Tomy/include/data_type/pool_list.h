@@ -314,6 +314,10 @@ INLINE void _PoolListBase_InsertAfter(_PoolListBase* self, umax pos_idx, const v
     if (pos_idx == _POOL_NULL) return;
     ERR_RET_NULL(self);
     ERR_RET_NULL(elem);
+    /* pos_idx 来自调用方（多半是迭代器）。Compact 缩容会把 capacity 减半并把所有
+       活动节点重新编号，旧迭代器里的下标可能已经 >= capacity —— 直接拿去索引池数组
+       就是越界读，紧接着 _PoolList_SetNext 是同地址的越界写。 */
+    ERR_RET_V_COND(pos_idx >= self->capacity, );
 
     umax idx = _PoolListBase_AllocSlot(self);
     if (idx == _POOL_NULL) return;
@@ -334,6 +338,7 @@ INLINE void _PoolListBase_EraseAfter(_PoolListBase* self, umax pos_idx)
 {
     ERR_RET_NULL(self);
     if (pos_idx == _POOL_NULL) return;
+    ERR_RET_V_COND(pos_idx >= self->capacity, );   /* 同上：失效迭代器的下标不能当数组下标用 */
 
     umax target = _PoolList_Next(self->pool, self->node_size, pos_idx);
     if (target == _POOL_NULL) return;

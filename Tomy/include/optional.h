@@ -81,7 +81,7 @@
             void (*_d)(void*) = (void (*)(void*))DESTROY;                                              \
             if (_d) _d(&opt->value);                                                                   \
         }                                                                                              \
-        opt->has_value = false;                                                                         \
+        if (opt) opt->has_value = false;   /* 上面那行守卫写在 if 里，这里不能裸解引用 */                                                                         \
     }                                                                                                   \
     INLINE void Optional_##T##_Reset(Optional_##T* opt, T v) {                                         \
         if (opt->has_value) {                                                                          \

@@ -25,6 +25,15 @@ VTABLE
 
 typedef void ElemConstructor(void* addr);
 typedef void ElemDestructor(void* addr);
+
+/// 元素拷贝。**NULL 是一个有意义的取值，不是"没有拷贝函数"**：
+///   - NULL    → 该类型可以按位搬移（POD，或 PvzTracks 这种自身持有指针但
+///               整体搬移即可的类型）。容器一律用 memcpy/memmove，并且
+///               **搬移后源槽位的所有权随之转移，绝不再析构源槽位**。
+///   - 非 NULL → 深拷贝。拷贝出的对象独立持有资源，源槽位仍归容器所有，
+///               搬移 / 擦除时源槽位照常析构。
+/// 这条约定是内存安全的关键：位搬移后再析构源 = 把新数组里的指针 free 掉
+/// （use-after-free），或者同一份资源被释放两次。
 typedef void ElemCopy(void* dest, const void* src);
 
 CLASS{
@@ -131,8 +140,10 @@ INLINE void _VectorBase_Resize(_VectorBase* self, const umax new_size)
             if (new_capacity == 0)    break;
         }
         _VectorBase_Reserve(self, new_capacity);
-        // If reserve failed, ensure we don't proceed to change size.
-        ERR_RET_V_COND_MSG(new_capacity < required, , "Failed to resize: not enough memory.");
+        // Reserve 失败时不会改动容量。这里必须看**实际状态**：
+        // 原来检查的是上面刚算出来的局部变量 new_capacity，它必然 >= required，
+        // 条件恒假，等于没检查——失败后会继续在 capacity 之外 construct/memset。
+        ERR_RET_V_COND_MSG(self->capacity < required, , "Failed to resize: not enough memory.");
     }
 
     if (self->data && self->elem_size > 0)
@@ -172,30 +183,37 @@ INLINE void _VectorBase_Reserve(_VectorBase* self, const umax new_capacity)
     ERR_RET_V_COND(new_capacity <= self->capacity, );
     ERR_RET_V_COND_MSG(self->elem_size == 0, , "Failed to reserve: element size is zero.");
     ERR_RET_V_COND_MSG(new_capacity == 0, , "Failed to reserve: new capacity is zero.");
+    // 容量 × 元素大小会回绕时不分配：否则 malloc 拿到一个被截断的字节数，
+    // 却把 capacity 记成完整值，后续写入直接越界。
+    ERR_RET_V_COND_MSG(new_capacity > (umax)-1 / self->elem_size, ,
+        "Failed to reserve: capacity * element size overflows.");
 
     const umax new_bytes = new_capacity * self->elem_size;
     void* new_data = malloc(new_bytes);
     ERR_RET_NULL_MSG(new_data, "Failed to reserve: not enough memory.");
 
-    // 拷贝旧元素到新内存
+    // 拷贝或搬移旧元素到新内存
     if (self->size > 0)
     {
         const byte* src = self->data;
         byte* dst = new_data;
         if (self->copy)
         {
+            // 深拷贝：源槽位仍然独立持有资源，拷完要把它们析构掉
             for (umax i = 0; i < self->size; ++i)
                 self->copy(dst + i * self->elem_size, src + i * self->elem_size);
-        }
-        else memcpy(dst, src, self->size * self->elem_size);
-    }
 
-    // 析构旧元素
-    if (self->destroy && self->data)
-    {
-        byte* p = self->data;
-        for (umax i = 0; i < self->size; ++i)
-            self->destroy(p + i * self->elem_size);
+            if (self->destroy)
+            {
+                for (umax i = 0; i < self->size; ++i)
+                    self->destroy((byte*)src + i * self->elem_size);
+            }
+        }
+        else
+        {
+            // 位搬移：所有权已经随字节转移到新内存，源槽位不能再析构
+            memcpy(dst, src, self->size * self->elem_size);
+        }
     }
 
     free(self->data);
@@ -332,11 +350,14 @@ INLINE void _VectorBase_Erase(_VectorBase* self, const umax index)
     }
     else
     {
-        // POD move: shift raw bytes left. memmove handles overlap.
-        memmove(target, target + self->elem_size, (self->size - index - 1) * self->elem_size);
-        // Destroy the last element if a destructor exists (it may be a duplicate after memmove).
+        // 被擦除的元素真的离开了容器，它的资源必须释放——否则这个元素必然泄漏
+        // （memmove 会直接把它覆盖掉，再也没有机会析构）。
         if (self->destroy)
-            self->destroy(base + last_index * self->elem_size);
+            self->destroy(target);
+        // 其余元素按位左移。尾部残留的是最后一个元素的位副本，所有权已经
+        // 跟着字节转移，不能再析构（析构 = 把移过去的指针 free 掉）。
+        // memmove handles overlap.
+        memmove(target, target + self->elem_size, (self->size - index - 1) * self->elem_size);
     }
 
     self->size -= 1;
@@ -451,17 +472,22 @@ INLINE void _VectorBase_SwapErase(_VectorBase* self, const umax index)
     byte* target = base + index * self->elem_size;
     byte* last = base + last_index * self->elem_size;
 
-    // Overwrite target with last element
+    // 被覆盖的 target 元素真的被移除了，无论哪种拷贝方式都要析构它
     if (self->destroy)
         self->destroy(target);
-    if (self->copy)
-        self->copy(target, last);
-    else
-        memcpy(target, last, self->elem_size);
 
-    // Destroy the now-unused last slot
-    if (self->destroy)
-        self->destroy(last);
+    if (self->copy)
+    {
+        // 深拷贝：last 仍然独立持有资源，拷完必须析构
+        self->copy(target, last);
+        if (self->destroy)
+            self->destroy(last);
+    }
+    else
+    {
+        // 位搬移：last 的所有权已经转移到 target，不能再析构
+        memcpy(target, last, self->elem_size);
+    }
 
     self->size -= 1;
 }
@@ -484,21 +510,22 @@ INLINE void _VectorBase_ShrinkToFit(_VectorBase* self)
 
     if (self->copy)
     {
+        // 深拷贝：源槽位仍归容器所有，拷完要析构
         byte* src = (byte*)self->data;
         byte* dst = (byte*)new_data;
         for (umax i = 0; i < self->size; ++i)
             self->copy(dst + i * self->elem_size, src + i * self->elem_size);
+
+        if (self->destroy)
+        {
+            for (umax i = 0; i < self->size; ++i)
+                self->destroy(src + i * self->elem_size);
+        }
     }
     else
     {
+        // 位搬移：所有权随字节转移，不能析构源
         memcpy(new_data, self->data, new_bytes);
-    }
-
-    if (self->destroy && self->data)
-    {
-        byte* p = (byte*)self->data;
-        for (umax i = 0; i < self->size; ++i)
-            self->destroy(p + i * self->elem_size);
     }
 
     free(self->data);
@@ -676,7 +703,13 @@ INLINE void _Vector_##T##_Create(Vector_##T* self) {                            
     self->vptr = (void*)&_Vector_##T##_VTable_Instance;                                     \
 }                                                                                           \
 INLINE Vector_##T* _Vector_##T##_New() {                                                    \
-    return (Vector_##T*)_VectorBase_New(sizeof(T), CONSTRUCT, DESTROY, COPY, CMP);               \
+    /* 必须走 _Vector_##T##_Create：它才会装上本类型的 vtable。                        \
+       用 _VectorBase_New 只会装上 Object 的 vtable，而且 sizeof(_VectorBase)          \
+       比 sizeof(Vector_##T) 小（少了 front / back），越界写。 */                      \
+    Vector_##T* self = (Vector_##T*)malloc(sizeof(Vector_##T));                             \
+    ERR_RET_V_NULL(self, NULL);                                                             \
+    _Vector_##T##_Create(self);                                                             \
+    return self;                                                                            \
 }                                                                                           \
 INLINE String* _Vector_##T##_ToString(Vector_##T* self) {                                   \
     String* str = New(String, STRING_CAPACITY);                                              \

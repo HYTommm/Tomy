@@ -96,6 +96,13 @@
             void (*_ed)(void*) = (void (*)(void*))ERR_DESTROY;                                      \
             if (_ed) _ed(&r->error);                                                                \
         }                                                                                           \
+        /* 析构完必须把 union 清零。                                          \
+           原来只把 ok 置为 false：于是第二次 Destroy 会走到 else 分支，    \
+           去析构 union 里**从未激活过**的那个成员——对 Ok 结果来说就是     \
+           free 一个未初始化的指针。清零之后两边都是全零对象，             \
+           与 _String_Destroy「先释放再清零」的幂等语义一致。               \
+           注意顺序：先析构、后清零。 */                                   \
+        memset(&r->value, 0, sizeof(T) > sizeof(E) ? sizeof(T) : sizeof(E));                        \
         r->ok = false;                                                                              \
     }
 

@@ -136,6 +136,16 @@ static inline bool _HashMapBase_Rehash(_HashMapBase* self, umax new_capacity)
     byte* old_keys = self->keys;
     byte* old_values = self->values;
     umax old_capacity = self->capacity;
+    umax old_size = self->size;
+
+    /* 不变量：新容量必须严格大于元素个数，否则线性探测必然找不到空槽。
+       Rehash 是公开 API，调用方可以传任意 n（包括比 size 小的值），
+       这里必须兜住——否则下面的探测循环会一直转下去（死循环）。 */
+    if (new_capacity <= old_size)
+    {
+        new_capacity = _umax_next_pow2(old_size + 1);
+        if (new_capacity <= old_size) return false;  /* 溢出 */
+    }
 
     _HashSlotStatus* new_slots = (_HashSlotStatus*)calloc(new_capacity, sizeof(_HashSlotStatus));
     byte* new_keys = (byte*)calloc(new_capacity, self->key_size);
@@ -170,14 +180,22 @@ static inline bool _HashMapBase_Rehash(_HashMapBase* self, umax new_capacity)
 
         new_slots[new_idx] = _HASH_OCCUPIED;
 
-        if (self->key_copy) self->key_copy(new_keys + new_idx * self->key_size, key);
+        /* copy == NULL 表示该类型按位搬移、所有权随字节转移，
+           搬完之后源槽位**不能**再析构——否则新桶里的指针会立刻变成悬垂的。
+           只有深拷贝（copy != NULL）时源对象才仍然独立持有资源，需要析构。 */
+        if (self->key_copy)
+        {
+            self->key_copy(new_keys + new_idx * self->key_size, key);
+            if (self->key_destroy) self->key_destroy(key);
+        }
         else memcpy(new_keys + new_idx * self->key_size, key, self->key_size);
 
-        if (self->value_copy) self->value_copy(new_values + new_idx * self->value_size, val);
+        if (self->value_copy)
+        {
+            self->value_copy(new_values + new_idx * self->value_size, val);
+            if (self->value_destroy) self->value_destroy(val);
+        }
         else memcpy(new_values + new_idx * self->value_size, val, self->value_size);
-
-        if (self->key_destroy) self->key_destroy(key);
-        if (self->value_destroy) self->value_destroy(val);
 
         self->size++;
     }
@@ -264,7 +282,10 @@ INLINE bool _HashMapBase_Insert(_HashMapBase* self, const void* key, const void*
         return true;
     }
 
-    /* Insert new entry */
+    /* Insert new entry.
+       idx 可能是 Lookup 挑中的墓碑槽（_HASH_DELETED）：复用它之后它不再是墓碑了，
+       deleted 必须跟着减一，否则计数只增不减，负载因子虚高会触发无谓的 rehash。 */
+    if (self->slots[idx] == _HASH_DELETED) self->deleted--;
     self->slots[idx] = _HASH_OCCUPIED;
     if (self->key_copy) self->key_copy(self->keys + idx * self->key_size, key);
     else memcpy(self->keys + idx * self->key_size, key, self->key_size);
@@ -297,6 +318,7 @@ INLINE bool _HashMapBase_TryEmplace(_HashMapBase* self, const void* key, const v
         return false;
 
     /* Insert new entry (key did not exist) */
+    if (self->slots[idx] == _HASH_DELETED) self->deleted--;  /* 复用墓碑，见 Insert */
     self->slots[idx] = _HASH_OCCUPIED;
     if (self->key_copy) self->key_copy(self->keys + idx * self->key_size, key);
     else memcpy(self->keys + idx * self->key_size, key, self->key_size);

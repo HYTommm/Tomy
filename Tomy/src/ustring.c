@@ -117,6 +117,10 @@ String* _String_ToString(String* self)
 bool _String_Reserve(String* self, const size_t new_capacity)
 {
     ERR_RET_V_NULL(self, false);
+    /* new_capacity + 1 会回绕成 0 时不能调 realloc：realloc(p, 0) 会**先把 p 释放掉**
+       再返回 NULL，调用方会把 NULL 当成"分配失败、原块仍然有效"，而 self->data
+       已经悬垂了。 */
+    ERR_RET_V_COND(new_capacity == (size_t)-1, false);
     char* buf = (char*)realloc(self->data, new_capacity + 1);
     if (buf == NULL)
     {
@@ -161,6 +165,26 @@ bool _String_InsertN(String* self, size_t pos, const char* s, size_t n)
     {
         pos = self->size;
     }
+    if (n > (size_t)-1 - self->size)   /* size + n 回绕 */
+    {
+        return false;
+    }
+
+    /* 源可能就指向 self 自己的缓冲区（Append 自身、或 Insert 自身的一段）。
+       此时有两个坑：_String_Reserve 的 realloc 会让 s 变成悬垂指针；
+       即便不扩容，下面的 memmove 也会先把源区间改写掉。
+       所以先把它摘到临时缓冲里。 */
+    char* scratch = NULL;
+    if (self->data
+        && (size_t)s >= (size_t)self->data
+        && (size_t)s <= (size_t)self->data + self->capacity)
+    {
+        scratch = (char*)malloc(n ? n : 1);
+        if (!scratch) return false;
+        memcpy(scratch, s, n);
+        s = scratch;
+    }
+
     size_t new_size = self->size + n;
     if (new_size > self->capacity)
     {
@@ -168,12 +192,14 @@ bool _String_InsertN(String* self, size_t pos, const char* s, size_t n)
         bool ok = _String_Reserve(self, new_capacity);
         if (!ok)
         {
+            free(scratch);
             return false;
         }
     }
     memmove(self->data + pos + n, self->data + pos, self->size - pos);
     memcpy(self->data + pos, s, n);
     self->size = new_size;
+    free(scratch);
     return true;
 }
 
