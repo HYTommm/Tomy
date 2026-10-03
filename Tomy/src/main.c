@@ -60,6 +60,9 @@ void optional_test(void);
 #ifdef RESULT_TEST
 void result_test(void);
 #endif
+#ifdef OWNERSHIP_TEST
+void ownership_test(void);
+#endif
 
 void test(void)
 {
@@ -113,6 +116,9 @@ void test(void)
 #endif
 #ifdef RESULT_TEST
     result_test();
+#endif
+#ifdef OWNERSHIP_TEST
+    ownership_test();
 #endif
 }
 

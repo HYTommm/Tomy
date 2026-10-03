@@ -72,6 +72,10 @@
 #define RESULT_TEST_STRING
 #endif
 
+// 所有权回归测试：元素自带堆资源 + ElemCopy == NULL 的组合。
+// 见 src/test_ownership.c 顶部说明。建议常开。
+#define OWNERSHIP_TEST
+
 //#define LIFETIME_TEST
 
 #define BENCHMARK

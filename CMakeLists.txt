@@ -78,6 +78,9 @@ set(TOMY_SOURCES
   Tomy/src/test_pool_dlist.c
   Tomy/src/test_algorithm.c
   Tomy/src/test_lifetime.c
+  Tomy/src/test_optional.c
+  Tomy/src/test_result.c
+  Tomy/src/test_ownership.c
   Tomy/src/benchmark.c
 )
 

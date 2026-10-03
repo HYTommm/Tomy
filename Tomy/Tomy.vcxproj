@@ -171,6 +171,7 @@
     <ClCompile Include="src\test_optional.c" />
     <ClCompile Include="src\test_pool_dlist.c" />
     <ClCompile Include="src\test_pool_list.c" />
+    <ClCompile Include="src\test_ownership.c" />
     <ClCompile Include="src\test_result.c" />
     <ClCompile Include="src\test_vector.c" />
     <ClCompile Include="src\ustring.c" />
