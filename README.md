@@ -223,6 +223,15 @@ v.vptr->destroy(&v);                  // 销毁
 
 例如 `VECTOR_IMPL_EX(String, _String_Create, _String_Destroy, _String_Copy, _String_cmp_default)`。
 
+**`copy == NULL` 是一个有意义的取值，不是"没有拷贝函数"**：它表示该类型可以**按位搬移**。
+容器此时用 `memcpy`/`memmove` 搬移元素，并且**搬移之后源槽位的所有权随之转移，容器不会再析构源槽位**。
+适用于 POD，也适用于"自身持有指针、整体搬移即可"的类型（把若干堆对象的所有权从一个槽位交给另一个）。
+反过来，只要 `copy != NULL`，容器就按深拷贝对待：源槽位仍归容器所有，搬移/擦除时会正常析构源槽位。
+
+> ⚠ 这条约定是内存安全的关键。位搬移之后再析构源槽位，等于把新位置上那些指针 `free` 掉
+> （use-after-free），紧接着容器析构时再释放一次（double free）。
+> `src/test_ownership.c` 专门覆盖这个组合，改容器代码时务必让它保持全绿。
+
 POD 类型使用 `VECTOR_IMPL(T)` 快速实例化（`NULL` 回调 → `memset`/`memcpy`）。
 
 已预实例化类型：i8/i16/i32/i64/imax + u8/byte/u16/u32/u64/umax + f32/f64 + Object + String。
@@ -377,6 +386,13 @@ int cmp(const T* a, const T* b);  /* 返回 <0, =0, >0 */
 ### 迭代器
 
 所有容器均提供迭代器，支持 `foreach` 宏和手动遍历。
+
+> ⚠ **迭代器失效**：任何结构性修改（插入 / 删除 / 扩容 / 缩容）都可能让已经取得的迭代器失效。
+> Vector 的扩容会搬走缓冲区；**PoolList / PoolDoublyList 更隐蔽**——它们在元素量降到容量的
+> 1/4 时会自动 `Compact`，把 `capacity` 减半并把所有活动节点**重新编号**，于是旧迭代器里缓存的
+> 槽位下标直接失效。拿失效的下标去 `insert_after` / `erase_after` / `insert` / `erase`，
+> 现在会在入口被上界检查拦下（按无效参数处理），不会越界读写；但这属于**误用**，
+> 正确做法是结构修改之后重新取迭代器。
 
 ```c
 /* foreach 自动迭代 */
